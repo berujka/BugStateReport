@@ -1,0 +1,1398 @@
+<!DOCTYPE html>
+<html lang="tr" class="scroll-smooth">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Süreç Analiz & Bug Yönetim Paneli</title>
+<!-- Tailwind CSS CDN -->
+<script src="https://cdn.tailwindcss.com"></script>
+<!-- Google Fonts Inter -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<!-- Font Awesome Icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">,
+
+<script>
+    tailwind.config = {
+        theme: {
+            extend: {
+                fontFamily: {
+                    sans: ['Inter', 'sans-serif'],
+                },
+                animation: {
+                    'spin-slow': 'spin 12s linear infinite',
+                    'pulse-fast': 'pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                }
+            }
+        }
+    }
+</script>
+<style>
+    ::-webkit-scrollbar {
+        width: 6px;
+    }
+    ::-webkit-scrollbar-track {
+        background: #020617;
+    }
+    ::-webkit-scrollbar-thumb {
+        background: #1e293b;
+        border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+        background: #10b981;
+    }
+    .animate-fade-in {
+        animation: fadeIn 0.3s ease-out forwards;
+    }
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(5px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+</style>
+
+</head>
+<body class="min-h-screen bg-slate-950 text-slate-100 font-sans selection:bg-emerald-500 selection:text-slate-900 pb-16">
+
+    <!-- Toast Notification container -->
+<div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2"></div>
+
+<!-- Header Banner -->
+<header class="relative overflow-hidden border-b border-slate-800 bg-slate-900/50 backdrop-blur-md sticky top-0 z-50">
+    <div class="absolute inset-0 bg-gradient-to-r from-emerald-500/10 via-teal-500/10 to-indigo-500/10 opacity-30"></div>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4 relative z-10">
+        <div>
+            <div class="flex items-center gap-2 mb-1">
+                <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
+                    Multi-Project QA Workspace
+                </span>
+                <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                    Aktif Sürüm: 2026.07
+                </span>
+            </div>
+            <h1 class="text-xl sm:text-2xl md:text-3xl font-extrabold tracking-tight text-white flex items-center gap-2">
+                <i class="fa-solid fa-layer-group text-emerald-400"></i>
+                Yazılım Süreç & Bug Analiz Paneli
+            </h1>
+        </div>
+
+        <!-- Global Project Switcher Tabs -->
+        <div class="bg-slate-950 p-1 rounded-xl border border-slate-800 flex items-center gap-1 self-start md:self-auto">
+            <button id="project-tab-hybris" onclick="switchProject('hybris')" class="px-4 py-2 rounded-lg text-xs font-bold transition-all flex items-center gap-2 bg-emerald-500 text-slate-950">
+                <i class="fa-solid fa-server"></i>
+                Hybris Backlog (125 Bug)
+            </button>
+            <button id="project-tab-mobilapp" onclick="switchProject('mobilapp')" class="px-4 py-2 rounded-lg text-xs font-bold transition-all flex items-center gap-2 text-slate-400 hover:text-white">
+                <i class="fa-solid fa-mobile-screen-button"></i>
+                Yeni Mobil App (Açık: 2 + 12 Yeni)
+            </button>
+        </div>
+    </div>
+</header>
+
+<!-- Main Content Grid -->
+<main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8">
+
+    <!-- PROJECT 1: HYBRIS BACKLOG TEMİZLİĞİ -->
+    <div id="project-hybris-view" class="space-y-8 animate-fade-in">
+
+        <!-- Summary and Monthly HUD -->
+        <section class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <!-- Exec Summary Card -->
+            <div class="lg:col-span-8 bg-gradient-to-br from-slate-900 to-slate-950 p-6 sm:p-8 rounded-2xl border border-slate-800 shadow-xl relative overflow-hidden flex flex-col justify-between">
+                <div class="max-w-3xl">
+                    <div class="flex items-center gap-2 text-emerald-400 font-bold text-sm mb-2">
+                        <i class="fa-solid fa-circle-nodes"></i>
+                        <span>HYBRIS PROJESİ SÜREÇ STATÜSÜ</span>
+                    </div>
+                    <h2 class="text-xl sm:text-2xl font-bold text-white mb-4">Hybris Backlog Temizliği</h2>
+                    <p class="text-slate-300 leading-relaxed text-sm sm:text-base mb-6">
+                        2025 yılından kalan ve halen aktif bekleyen <strong id="summary-bug-count" class="text-emerald-400 font-semibold">125 adet açık bug</strong>'ın temizlenmesi yalnızca basit bir statü güncellemesi değildir. Her bir kaydın derinlemesine analiz edilmesi, iş kurallarının gözden geçirilmesi, platform testlerinin yapılması ve ardından nihai karara varılması gerekmektedir.
+                    </p>
+                    <!-- Warning Box -->
+                    <div class="bg-rose-500/10 border border-rose-500/25 rounded-xl p-4 flex items-start gap-3">
+                        <i class="fa-solid fa-circle-exclamation text-rose-400 text-xl shrink-0 mt-0.5"></i>
+                        <div>
+                            <h4 class="font-semibold text-rose-300 text-sm">Önemli Stratejik Karar: 2025 Öncesi Kayıtlar</h4>
+                            <p class="text-rose-400/90 text-xs mt-1">
+                                Analiz karmaşıklığı ve güncelliğini yitirmiş iş kuralları nedeniyle <strong>2025 öncesine ait tüm eski bugların incelenmeden doğrudan kapatılması</strong> tavsiye edilmektedir. Bu sayede odak noktası güncel sistem mimarisine kaydırılacaktır.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Monthly Trend Card -->
+            <div class="lg:col-span-4 bg-slate-900 p-6 rounded-2xl border border-slate-800 flex flex-col justify-between relative overflow-hidden">
+                <div class="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
+                    <i class="fa-solid fa-chart-line text-rose-500 text-9xl"></i>
+                </div>
+                <div>
+                    <h3 class="text-lg font-bold text-white mb-2 flex items-center gap-2">
+                        <span class="w-2.5 h-2.5 rounded-full bg-rose-500 animate-ping"></span>
+                        Aylık Trend Analizi
+                    </h3>
+                    <p class="text-xs text-slate-400 mb-6 font-light">Haziran ayına ait genel dinamik yazılım hatalarının durum analizi.</p>
+
+                    <div class="space-y-4">
+                        <!-- Bug increase -->
+                        <div class="flex items-center justify-between p-3 rounded-xl bg-slate-950/40 border border-slate-800/60">
+                            <div class="flex items-center gap-2">
+                                <span class="text-rose-500 text-lg">📈</span>
+                                <span class="text-xs text-slate-300">Haziran Ayında Açılan Yeni Bug</span>
+                            </div>
+                            <span class="text-base font-extrabold text-rose-400">+65 Bug</span>
+                        </div>
+                        <!-- Bug closed -->
+                        <div class="flex items-center justify-between p-3 rounded-xl bg-slate-950/40 border border-slate-800/60">
+                            <div class="flex items-center gap-2">
+                                <span class="text-emerald-500 text-lg">📉</span>
+                                <span class="text-xs text-slate-300">Kapatılan Bug</span>
+                            </div>
+                            <span class="text-base font-extrabold text-emerald-400">-43 Bug</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-6 pt-4 border-t border-slate-800/80">
+                    <div class="p-3 bg-rose-500/10 border border-rose-500/20 rounded-lg text-xs">
+                        <p class="text-rose-300 font-medium leading-relaxed">
+                            <strong>Kritik Tespit:</strong> Yapılan değerlendirmeler, canlı ortama yansıyan hataların temel nedeninin teknik geliştirmeden çok süreç yönetimi olduğunu göstermektedir. Özellikle net tanımlanmamış iş kuralları, yetersiz analiz ve task içerikleri, ekipler arasındaki bilgi aktarım eksiklikleri, platformlar arası uyumsuzluklar, standartlaştırılmamış UAT süreçleri ve son dakika kapsam değişiklikleri; geliştirmelerde tekrar iş yapma oranını artırmakta, test eforunu yükseltmekte ve canlı ortam riskini önemli ölçüde artırmaktadır.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Modules Dynamic Bug Distribution Table -->
+        <section class="bg-slate-900 p-6 rounded-2xl border border-slate-800">
+            <div class="flex flex-col md:flex-row justify-between md:items-center gap-4 mb-6">
+                <div>
+                    <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-table-cells-large text-teal-400"></i>
+                        Modüler Bug Dağılım Tablosu (Sıralanabilir)
+                    </h3>
+                    <p class="text-xs text-slate-400 mt-0.5">Sistem modüllerindeki toplam açık hata sayıları ve 2025 yılından devreden oranlar.</p>
+                </div>
+
+                <div class="flex bg-slate-950 p-1 rounded-xl border border-slate-800 text-xs shrink-0 self-start md:self-auto">
+                    <button id="sort-total-btn" onclick="handleSort('total')" class="px-3 py-1.5 rounded-lg font-medium transition-all bg-slate-850 text-white border border-slate-700/50">
+                        Toplam Bug'a Göre ▼
+                    </button>
+                    <button id="sort-y2025-btn" onclick="handleSort('y2025')" class="px-3 py-1.5 rounded-lg font-medium transition-all text-slate-400">
+                        2025 Bug Sayısı
+                    </button>
+                </div>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-xs text-slate-300 border-collapse">
+                    <thead>
+                        <tr class="border-b border-slate-800/80 text-slate-400 font-semibold">
+                            <th class="pb-3 pl-4">Modül / Alan</th>
+                            <th class="pb-3 text-center">Toplam Açık Bug</th>
+                            <th class="pb-3 text-center">2025 Yılı Açık (Kalan)</th>
+                            <th class="pb-3 text-center">2026 / Güncel</th>
+                            <th class="pb-3 pr-4">Dağılım Oranı (2025'ten Gelen)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="modules-table-body" class="divide-y divide-slate-800/50">
+                        <!-- JS ile render edilecektir -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Dynamic Efor Parameter Calculator -->
+        <section class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Slider Panel -->
+            <div class="bg-slate-900 p-6 rounded-2xl border border-slate-800 flex flex-col justify-between">
+                <div>
+                    <h3 class="text-lg font-bold text-white mb-2 flex items-center gap-2">
+                        <i class="fa-solid fa-sliders text-emerald-400"></i>
+                        Efor Parametreleri
+                    </h3>
+                    <p class="text-xs text-slate-400 mb-6">Her bir bug için harcanacak süreyi ve günlük verimli çalışma kapasitesini ayarlayarak toplam maliyeti hesaplayın.</p>
+
+                    <div class="space-y-2 mb-6">
+                        <div class="flex justify-between text-sm">
+                            <span class="text-slate-300">Bug Başına Ortalama Süre:</span>
+                            <span id="display-minutes" class="font-bold text-emerald-400">20 Dakika</span>
+                        </div>
+                        <input type="range" id="input-avg-minutes" min="15" max="25" value="20" class="w-full accent-emerald-500 h-1.5 bg-slate-800 rounded-lg cursor-pointer">
+                        <div class="flex justify-between text-[10px] text-slate-500">
+                            <span>15 dk (Hızlı)</span>
+                            <span>20 dk (Önerilen)</span>
+                            <span>25 dk (Derinlemesine)</span>
+                        </div>
+                    </div>
+
+                    <div class="space-y-2">
+                        <div class="flex justify-between text-sm">
+                            <span class="text-slate-300">Günlük Verimli Çalışma:</span>
+                            <span id="display-working-hours" class="font-bold text-indigo-400">8 Saat</span>
+                        </div>
+                        <input type="range" id="input-working-hours" min="4" max="10" value="8" class="w-full accent-indigo-500 h-1.5 bg-slate-800 rounded-lg cursor-pointer">
+                        <div class="flex justify-between text-[10px] text-slate-500">
+                            <span>4 Saat</span>
+                            <span>8 Saat (Standart)</span>
+                            <span>10 Saat</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-6 pt-4 border-t border-slate-800">
+                    <div class="flex items-center gap-2 text-xs text-slate-400">
+                        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
+                        <span>Canlı efor simülasyonu aktif.</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- KPI Displays -->
+            <div class="bg-slate-900 p-6 rounded-2xl border border-slate-800 lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6 relative">
+                <div class="bg-slate-950/60 p-5 rounded-xl border border-slate-800/80 flex flex-col justify-between">
+                    <div>
+                        <span class="text-xs font-semibold uppercase tracking-wider text-slate-500">Toplam Süre İhtiyacı</span>
+                        <div class="text-4xl font-extrabold text-white mt-2 mb-1">
+                            <span id="kpi-total-hours">41.7</span> <span class="text-lg font-normal text-slate-400">Saat</span>
+                        </div>
+                        <p id="kpi-hours-desc" class="text-xs text-slate-400 leading-normal">
+                            Kalan bug'ların tamamı ortalama süreye göre analiz edildiğinde gereken süre.
+                        </p>
+                    </div>
+                    <div class="mt-4 pt-3 border-t border-slate-900 flex justify-between items-center text-xs text-slate-400">
+                        <span id="display-completed-bugs">Temizlenen Bug: 0 / 125</span>
+                        <span class="w-24 bg-slate-800 h-1.5 rounded-full overflow-hidden">
+                            <span id="kpi-progress-bar" class="bg-emerald-500 h-full block transition-all duration-300" style="width: 0%"></span>
+                        </span>
+                    </div>
+                </div>
+
+                <div class="bg-slate-950/60 p-5 rounded-xl border border-slate-800/80 flex flex-col justify-between">
+                    <div>
+                        <span class="text-xs font-semibold uppercase tracking-wider text-slate-500">Hesaplanan Efor (Adam/Gün)</span>
+                        <div class="text-4xl font-extrabold text-emerald-400 mt-2 mb-1">
+                            ~ <span id="kpi-person-days">5.2</span> <span class="text-lg font-normal text-slate-400">A/G</span>
+                        </div>
+                        <p class="text-xs text-slate-400 leading-normal">
+                            Ekibin günlük verimli çalışma saatine göre tahmini tamamlanma takvimi.
+                        </p>
+                    </div>
+
+                    <div id="kpi-eta-pill" class="mt-4 bg-emerald-950/20 text-emerald-400 border border-emerald-800/30 px-3 py-1.5 rounded-lg text-xs text-center font-semibold">
+                        Tahmini tamamlanma: ~ 6 İş Günü
+                    </div>
+                </div>
+
+                <!-- Presets comparisons -->
+                <div class="md:col-span-2 grid grid-cols-3 gap-2 bg-slate-950/40 p-3 rounded-xl border border-slate-800/50">
+                    <div class="text-center p-2 rounded bg-slate-900/30">
+                        <span class="text-[10px] text-slate-500 block mb-1">İyimser (15 dk)</span>
+                        <span id="preset-15-val" class="text-xs font-bold text-slate-300">~3.9 A/G</span>
+                    </div>
+                    <div class="text-center p-2 rounded bg-slate-900/60 border border-slate-800">
+                        <span class="text-[10px] text-emerald-400 block mb-1">Beklenen (20 dk)</span>
+                        <span id="preset-20-val" class="text-xs font-bold text-white">~5.2 A/G</span>
+                    </div>
+                    <div class="text-center p-2 rounded bg-slate-900/30">
+                        <span class="text-[10px] text-slate-500 block mb-1">Kötümser (25 dk)</span>
+                        <span id="preset-25-val" class="text-xs font-bold text-slate-300">~6.5 A/G</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Process Steps & Interactive Simulator -->
+        <section class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            <!-- Process Workflow flow -->
+            <div class="lg:col-span-5 bg-slate-900 p-6 rounded-2xl border border-slate-800 flex flex-col justify-between">
+                <div>
+                    <h3 class="text-lg font-bold text-white mb-1 flex items-center gap-2">
+                        <i class="fa-solid fa-code-branch text-indigo-400"></i>
+                        Bug İnceleme Süreç Adımları
+                    </h3>
+                    <p class="text-xs text-slate-400 mb-6">Her bir bug için işletilen 4 aşamalı standart operasyon süreci.</p>
+
+                    <div class="space-y-4 relative before:absolute before:left-[15px] before:top-2 before:bottom-2 before:w-[2px] before:bg-slate-800">
+
+                        <div class="flex gap-4 relative">
+                            <div class="w-8 h-8 rounded-full bg-slate-850 border border-slate-700 flex items-center justify-center text-xs font-bold text-slate-300 z-10 shrink-0">1</div>
+                            <div>
+                                <h4 class="text-sm font-semibold text-white">Kapsamın Anlaşılması</h4>
+                                <p class="text-xs text-slate-400 mt-0.5">Jira kaydı, iş kuralları ve eski yorumların gözden geçirilmesi.</p>
+                            </div>
+                        </div>
+
+                        <div class="flex gap-4 relative">
+                            <div class="w-8 h-8 rounded-full bg-slate-850 border border-slate-700 flex items-center justify-center text-xs font-bold text-slate-300 z-10 shrink-0">2</div>
+                            <div>
+                                <h4 class="text-sm font-semibold text-white">Platform Tespiti</h4>
+                                <p class="text-xs text-slate-400 mt-0.5">Hatanın etkilediği platformların (Web, Mobile, App) belirlenmesi.</p>
+                            </div>
+                        </div>
+
+                        <div class="flex gap-4 relative">
+                            <div class="w-8 h-8 rounded-full bg-slate-850 border border-slate-700 flex items-center justify-center text-xs font-bold text-slate-300 z-10 shrink-0">3</div>
+                            <div>
+                                <h4 class="text-sm font-semibold text-white">Yeniden Doğrulama</h4>
+                                <p class="text-xs text-slate-400 mt-0.5">Hatanın güncel canlı/test ortamlarında devam edip etmediğinin testi.</p>
+                            </div>
+                        </div>
+
+                        <div class="flex gap-4 relative">
+                            <div class="w-8 h-8 rounded-full bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center text-xs font-bold text-indigo-400 z-10 shrink-0">4</div>
+                            <div>
+                                <h4 class="text-sm font-semibold text-indigo-400">Karar & JIRA Güncelleme</h4>
+                                <p class="text-xs text-slate-400 mt-0.5">Nihai kararın verilerek JIRA kaydının doğru statüye güncellenmesi.</p>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+                <div class="mt-6 pt-4 border-t border-slate-850 text-xs text-slate-500">
+                    <i class="fa-solid fa-circle-info text-indigo-400 mr-1"></i>
+                    Süreci standartlaştırmak hata analiz süresini %15 azaltır.
+                </div>
+            </div>
+
+            <!-- Simulator widget -->
+            <div class="lg:col-span-7 bg-slate-900 p-6 rounded-2xl border border-slate-800 flex flex-col justify-between">
+                <div>
+                    <div class="flex justify-between items-center mb-1">
+                        <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                            <i class="fa-solid fa-gamepad text-emerald-400"></i>
+                            Arındırma Simülatörü
+                        </h3>
+                        <span class="text-[10px] text-slate-500">Süreci deneyimleyin</span>
+                    </div>
+                    <p class="text-xs text-slate-400 mb-6">Aşağıdaki rastgele bug kaydını adımları takip ederek arındırın ve veritabanını güncelleyin.</p>
+
+                    <!-- Dynamic Simulator Bug Card -->
+                    <div class="bg-slate-950 p-5 rounded-xl border border-slate-800 relative mb-6">
+                        <div class="flex justify-between items-start mb-2">
+                            <span id="simulator-bug-id" class="text-xs font-mono text-emerald-400 font-semibold bg-emerald-950/30 px-2 py-0.5 rounded border border-emerald-900/30">BUG-2025-084</span>
+                            <div class="flex items-center gap-2">
+                                <span id="simulator-bug-module" class="text-[10px] bg-slate-800 px-1.5 py-0.5 rounded text-slate-400 font-medium capitalize text-center">Modül: checkout</span>
+                                <span id="simulator-bug-date" class="text-[10px] text-slate-500">Oluşturma: 14.04.2025</span>
+                            </div>
+                        </div>
+                        <h4 id="simulator-bug-title" class="text-sm font-semibold text-white mb-2">Sepet Sayfasında Mobil Cihazlarda 'Ödeme Yap' Butonunun Tıklanamaması</h4>
+                        <p id="simulator-bug-desc" class="text-xs text-slate-400 leading-normal mb-4">
+                            "Safari mobil tarayıcısında ödeme sayfasına gitmek istediğinde buton alt menünün altında kalıyor."
+                        </p>
+
+                        <!-- Progress inside simulator -->
+                        <div class="flex gap-2 mb-4">
+                            <span id="sim-indicator-step-1" class="h-1 flex-1 rounded-full bg-emerald-500 transition-all duration-300"></span>
+                            <span id="sim-indicator-step-2" class="h-1 flex-1 rounded-full bg-slate-800 transition-all duration-300"></span>
+                        </div>
+
+                        <!-- Step 1 Layout -->
+                        <div id="sim-step-1-container" class="space-y-3 animate-fade-in">
+                            <span class="text-xs font-semibold text-slate-300 block">1. Doğrulanacak Platformları Seçin:</span>
+                            <div class="grid grid-cols-2 gap-2">
+                                <button type="button" onclick="togglePlatform('Web')" id="btn-platform-Web" class="platform-btn px-3 py-2 text-xs rounded-lg border text-left flex items-center justify-between transition-all bg-slate-900 border-slate-800 text-slate-400">
+                                    <span>Web</span>
+                                    <span class="dot w-1.5 h-1.5 rounded-full bg-transparent"></span>
+                                </button>
+                                <button type="button" onclick="togglePlatform('Mobile Web')" id="btn-platform-Mobile-Web" class="platform-btn px-3 py-2 text-xs rounded-lg border text-left flex items-center justify-between transition-all bg-slate-900 border-slate-800 text-slate-400">
+                                    <span>Mobile Web</span>
+                                    <span class="dot w-1.5 h-1.5 rounded-full bg-transparent"></span>
+                                </button>
+                                <button type="button" onclick="togglePlatform('Android App')" id="btn-platform-Android-App" class="platform-btn px-3 py-2 text-xs rounded-lg border text-left flex items-center justify-between transition-all bg-slate-900 border-slate-800 text-slate-400">
+                                    <span>Android App</span>
+                                    <span class="dot w-1.5 h-1.5 rounded-full bg-transparent"></span>
+                                </button>
+                                <button type="button" onclick="togglePlatform('iOS App')" id="btn-platform-iOS-App" class="platform-btn px-3 py-2 text-xs rounded-lg border text-left flex items-center justify-between transition-all bg-slate-900 border-slate-800 text-slate-400">
+                                    <span>iOS App</span>
+                                    <span class="dot w-1.5 h-1.5 rounded-full bg-transparent"></span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Step 2 Layout -->
+                        <div id="sim-step-2-container" class="space-y-3 hidden animate-fade-in">
+                            <span class="text-xs font-semibold text-slate-300 block">2. Yeniden Doğrulama ve Karar:</span>
+                            <div class="grid grid-cols-2 gap-2">
+                                <button type="button" onclick="selectDecision('Devam Ediyor')" id="decision-devam" class="decision-btn px-3 py-2 text-xs rounded-lg border text-left transition-all border-rose-500/40 text-rose-300">Devam Ediyor</button>
+                                <button type="button" onclick="selectDecision('Düzelmiş')" id="decision-duzelmis" class="decision-btn px-3 py-2 text-xs rounded-lg border text-left transition-all border-emerald-500/40 text-emerald-300">Düzelmiş (Kapat)</button>
+                                <button type="button" onclick="selectDecision('Duplicate')" id="decision-duplicate" class="decision-btn px-3 py-2 text-xs rounded-lg border text-left transition-all border-amber-500/40 text-amber-300">Duplicate</button>
+                                <button type="button" onclick="selectDecision('Won\'t Fix')" id="decision-wontfix" class="decision-btn px-3 py-2 text-xs rounded-lg border text-left transition-all border-slate-500/40 text-slate-300">Won't Fix</button>
+                                <button type="button" onclick="selectDecision('Obsolete')" id="decision-obsolete" class="decision-btn px-3 py-2 text-xs rounded-lg border text-left transition-all border-slate-500/40 text-slate-300">Obsolete</button>
+                                <button type="button" onclick="selectDecision('Improvement Olarak Taşı')" id="decision-improvement" class="decision-btn px-3 py-2 text-xs rounded-lg border text-left transition-all border-indigo-500/40 text-indigo-300">Improvement Yap</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Simulator Actions -->
+                <div class="flex justify-between items-center gap-4">
+                    <button type="button" onclick="resetSimulatorProgress()" class="text-xs text-slate-500 hover:text-slate-300 underline transition-all bg-transparent border-0 cursor-pointer">
+                        Tüm Verileri Sıfırla
+                    </button>
+
+                    <button type="button" onclick="handleSimulationNext()" id="btn-simulator-submit" class="px-5 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-slate-950 font-bold text-xs rounded-xl shadow-lg flex items-center gap-2 transition-all">
+                        <span id="btn-submit-text">Sonraki Adıma Geç</span>
+                        <i class="fa-solid fa-chevron-right"></i>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Simulator logs wrapper -->
+        <div id="sim-logs-wrapper" class="hidden bg-slate-900/60 p-5 rounded-2xl border border-slate-850 animate-fade-in">
+            <div class="flex justify-between items-center mb-4">
+                <h4 class="text-sm font-bold text-white flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                    Simüle Edilen Bug Kayıt Geçmişi (<span id="sim-logs-count">0</span>)
+                </h4>
+                <span class="text-[10px] text-slate-500">Kalan Efor: <span id="log-remaining-hours">41.7</span> Saat</span>
+            </div>
+            <div id="sim-logs-container" class="max-h-40 overflow-y-auto space-y-2 pr-2"></div>
+        </div>
+
+        <!-- Platform Test Matrix Tabs -->
+        <section class="bg-slate-900 p-6 rounded-2xl border border-slate-800">
+            <div class="flex flex-col md:flex-row justify-between md:items-center mb-6 gap-4">
+                <div>
+                    <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-tablet-screen-button text-indigo-400"></i>
+                        Platform Test Matrisi ve Kapsamı
+                    </h3>
+                    <p class="text-xs text-slate-400">Platformlar bazında incelenmesi gereken kritik teknik detaylar ve test alanları.</p>
+                </div>
+
+                <div class="flex bg-slate-950 p-1 rounded-xl border border-slate-850 text-xs shrink-0 self-start md:self-auto overflow-x-auto max-w-full">
+                    <button type="button" onclick="setTab('all')" id="tab-all" class="tab-btn px-3 py-1.5 rounded-lg font-medium transition-all shrink-0 bg-slate-800 text-white">Tümü</button>
+                    <button type="button" onclick="setTab('web')" id="tab-web" class="tab-btn px-3 py-1.5 rounded-lg font-medium transition-all shrink-0 text-slate-400 hover:text-slate-200">Web & Mobile Web</button>
+                    <button type="button" onclick="setTab('app')" id="tab-app" class="tab-btn px-3 py-1.5 rounded-lg font-medium transition-all shrink-0 text-slate-400 hover:text-slate-200">Mobile Apps</button>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div id="platform-card-web" class="platform-card bg-slate-950 p-5 rounded-xl border border-slate-850 hover:border-slate-800 transition-all flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center gap-2.5 mb-3">
+                            <span class="p-2 bg-emerald-500/10 text-emerald-400 rounded-lg"><i class="fa-solid fa-globe text-base"></i></span>
+                            <h4 class="font-bold text-white text-sm">Web Platformu</h4>
+                        </div>
+                        <ul class="space-y-2 text-xs text-slate-400">
+                            <li><span class="text-emerald-400 mr-1.5">•</span> Tarayıcı uyumluluk testleri (Chrome, Safari, Firefox).</li>
+                            <li><span class="text-emerald-400 mr-1.5">•</span> Farklı ekran çözünürlüğü ve responsive testleri.</li>
+                        </ul>
+                    </div>
+                    <div class="mt-4 pt-3 border-t border-slate-900 text-[10px] text-slate-500">Öncelik: Kritik Ödeme/Giriş Akışları</div>
+                </div>
+
+                <div id="platform-card-mweb" class="platform-card bg-slate-950 p-5 rounded-xl border border-slate-850 hover:border-slate-800 transition-all flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center gap-2.5 mb-3">
+                            <span class="p-2 bg-emerald-500/10 text-emerald-400 rounded-lg"><i class="fa-solid fa-mobile-screen text-base"></i></span>
+                            <h4 class="font-bold text-white text-sm">Mobile Web</h4>
+                        </div>
+                        <ul class="space-y-2 text-xs text-slate-400">
+                            <li><span class="text-emerald-400 mr-1.5">•</span> iOS Safari ve Android Chrome dokunmatik testleri.</li>
+                            <li><span class="text-emerald-400 mr-1.5">•</span> Mobil klavye açıldığında form kaymaları.</li>
+                        </ul>
+                    </div>
+                    <div class="mt-4 pt-3 border-t border-slate-900 text-[10px] text-slate-500">Öncelik: UX / Tıklama ve Kaydırma</div>
+                </div>
+
+                <div id="platform-card-android" class="platform-card bg-slate-950 p-5 rounded-xl border border-slate-850 hover:border-slate-800 transition-all flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center gap-2.5 mb-3">
+                            <span class="p-2 bg-indigo-500/10 text-indigo-400 rounded-lg"><i class="fa-brands fa-android text-base"></i></span>
+                            <h4 class="font-bold text-white text-sm">Android App</h4>
+                        </div>
+                        <ul class="space-y-2 text-xs text-slate-400">
+                            <li><span class="text-indigo-400 mr-1.5">•</span> Farklı Android OS sürümlerinde geriye uyumluluk.</li>
+                            <li><span class="text-indigo-400 mr-1.5">•</span> Cihaz bazlı ekran çentik ve güvenli alan testleri.</li>
+                        </ul>
+                    </div>
+                    <div class="mt-4 pt-3 border-t border-slate-900 text-[10px] text-slate-500">Öncelik: APK Sürümleri & OS Dağılımı</div>
+                </div>
+
+                <div id="platform-card-ios" class="platform-card bg-slate-950 p-5 rounded-xl border border-slate-850 hover:border-slate-800 transition-all flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center gap-2.5 mb-3">
+                            <span class="p-2 bg-indigo-500/10 text-indigo-400 rounded-lg"><i class="fa-brands fa-apple text-base"></i></span>
+                            <h4 class="font-bold text-white text-sm">iOS App</h4>
+                        </div>
+                        <ul class="space-y-2 text-xs text-slate-400">
+                            <li><span class="text-indigo-400 mr-1.5">•</span> iOS güncel sürümleri ve cihaz modelleri (iPhone SE - Pro Max).</li>
+                            <li><span class="text-indigo-400 mr-1.5">•</span> Geri bildirim (Haptic) ve geçiş animasyonları doğrulaması.</li>
+                        </ul>
+                    </div>
+                    <div class="mt-4 pt-3 border-t border-slate-900 text-[10px] text-slate-500">Öncelik: App Store Standartları</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Improvements Strategy Panel -->
+        <section class="bg-slate-900 p-6 sm:p-8 rounded-2xl border border-slate-800">
+            <div class="flex flex-col md:flex-row justify-between md:items-center gap-6 mb-8">
+                <div>
+                    <h3 class="text-xl font-bold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-arrows-spin text-emerald-400 animate-spin-slow"></i>
+                        Geleceğe Yönelik Süreç İyileştirmeleri
+                    </h3>
+                    <p class="text-xs text-slate-400 mt-1">Bug birikimini kalıcı olarak engellemek için tasarlanmış yeni operasyonel kurallar.</p>
+                </div>
+
+                <div class="bg-slate-950 p-4 rounded-xl border border-slate-850 flex items-center gap-4 shrink-0">
+                    <div class="relative flex items-center justify-center">
+                        <svg class="w-16 h-16 transform -rotate-90">
+                            <circle cx="32" cy="32" r="28" stroke="currentColor" class="text-slate-850" stroke-width="4" fill="transparent" />
+                            <circle id="maturity-circle" cx="32" cy="32" r="28" stroke="currentColor" class="text-emerald-400 transition-all duration-500" stroke-width="4" fill="transparent" stroke-dasharray="175.9" stroke-dashoffset="175.9" />
+                        </svg>
+                        <span id="maturity-score-text" class="absolute text-sm font-bold text-white">0%</span>
+                    </div>
+                    <div>
+                        <span class="text-[10px] text-slate-500 uppercase tracking-wider block font-semibold">Süreç Olgunluk Skoru</span>
+                        <span id="maturity-status-text" class="text-xs text-slate-300 font-medium">Kural Seçilmedi</span>
+                    </div>
+                </div>
+            </div>
+
+            <div id="checklist-container" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+        </section>
+
+    </div>
+
+    <!-- PROJECT 2: YENİ MOBİL APP SÜRECİ -->
+    <div id="project-mobilapp-view" class="space-y-8 hidden animate-fade-in">
+
+        <!-- STAGE AND CRITICAL ALERTS -->
+        <section class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Critical Resource Alert Box -->
+            <div class="lg:col-span-2 bg-gradient-to-br from-rose-950/40 to-slate-950 p-6 rounded-2xl border border-rose-900/40 shadow-xl relative overflow-hidden flex flex-col justify-between">
+                <div class="absolute -top-10 -right-10 opacity-10 pointer-events-none">
+                    <i class="fa-solid fa-triangle-exclamation text-rose-500 text-9xl animate-pulse-fast"></i>
+                </div>
+                <div>
+                    <div class="flex items-center gap-2 px-3 py-1 bg-rose-500/10 border border-rose-500/20 text-rose-400 rounded-lg text-xs font-bold w-fit mb-4 animate-pulse-fast">
+                        <i class="fa-solid fa-circle-exclamation"></i>
+                        EK KAYNAK İHTİYACI KRİTİK!
+                    </div>
+                    <h2 class="text-xl sm:text-2xl font-bold text-white mb-2">Proje Statüsü: Yeni Mobil App Projesi</h2>
+                    <p class="text-slate-300 leading-relaxed text-sm sm:text-base">
+                        Test bekleyen 15 civarında konu bulunmakta olup ekip bu hafta upgrade projesininde testlerine odaklandı. Süreç genelindeki tasarımsal revizyonlar ve efor aşımlarına, sağlık sorunları kaynaklı eksilmelerde eklenince kapasitemiz sınır noktaya ulaşmıştır. Teslimat risklerini önlemek adına **ek kaynak desteği kritik önem taşımaktadır**. Testler süratle devam etmekte olup, yeni tespit edilen hatalar anında JIRA'ya aktarılarak geliştirme ekibine iletilmektedir.
+                    </p>
+                </div>
+                <div class="mt-6 pt-4 border-t border-rose-900/30 flex flex-wrap items-center gap-4 text-xs">
+                    <span class="text-rose-400"><i class="fa-solid fa-clock-rotate-left mr-1.5"></i>20 Temmuz Testleri Tamamlandı</span>
+                    <span class="text-slate-400"><i class="fa-solid fa-arrow-right-long mr-1.5"></i>12 Yeni Kayıt Sıraya Alındı</span>
+                </div>
+            </div>
+
+            <!-- Monthly Activity HUD Card -->
+            <div class="bg-slate-900 p-6 rounded-2xl border border-slate-800 flex flex-col justify-between relative overflow-hidden">
+                <div class="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
+                    <i class="fa-solid fa-circle-play text-indigo-500 text-9xl"></i>
+                </div>
+                <div>
+                    <h3 class="text-lg font-bold text-white mb-2 flex items-center gap-2">
+                        <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping"></span>
+                        Aktif Test Süreci
+                    </h3>
+                    <p class="text-xs text-slate-400 mb-6">Canlı olarak yürütülen doğrulama ve test çevrimi detayları.</p>
+
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between p-3 rounded-xl bg-slate-950/40 border border-slate-800/60">
+                            <span class="text-xs text-slate-300 flex items-center gap-2">
+                                <span class="text-emerald-400 text-sm">●</span> Excel Bug Kapama Oranı
+                            </span>
+                            <span class="text-sm font-extrabold text-emerald-400">38 / 40 Kapatıldı</span>
+                        </div>
+
+                        <div class="flex items-center justify-between p-3 rounded-xl bg-slate-950/40 border border-slate-800/60">
+                            <span class="text-xs text-slate-300 flex items-center gap-2">
+                                <span class="text-amber-400 text-sm">●</span> Devam Eden Test Maddesi
+                            </span>
+                            <span class="text-sm font-extrabold text-amber-400">5 Madde</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-4 pt-3 border-t border-slate-800">
+                    <p class="text-[10px] text-slate-500 leading-relaxed">
+                        * Yeni tespit edilen 12 bug JIRA'ya aktarıldığında aktif takip edilen bug listesi güncellenecektir.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Mobil App Status KPIs Grid -->
+        <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <!-- KPI 1: Excel Kapama Progress -->
+            <div class="bg-slate-900 p-5 rounded-2xl border border-slate-800 flex flex-col justify-between">
+                <div>
+                    <span class="text-xs font-semibold uppercase tracking-wider text-slate-500">Excel Bug Durumu</span>
+                    <div class="flex items-baseline gap-2 mt-2">
+                        <span class="text-3xl font-extrabold text-emerald-400">38/40</span>
+                        <span class="text-xs text-slate-400">Kapatıldı</span>
+                    </div>
+                    <p class="text-[11px] text-slate-400 mt-2">Önceden Excel'de tutulan 40 kayıttan yalnızca <strong>2 aktif açık bug</strong> kalmıştır.</p>
+                </div>
+                <div class="mt-4">
+                    <div class="flex justify-between text-[10px] text-slate-500 mb-1">
+                        <span>Kapanış Başarısı</span>
+                        <span>95%</span>
+                    </div>
+                    <div class="w-full bg-slate-850 h-1.5 rounded-full overflow-hidden">
+                        <div class="bg-emerald-400 h-full rounded-full" style="width: 95%"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- KPI 2: Monday 20 July Tests -->
+            <div class="bg-slate-900 p-5 rounded-2xl border border-slate-800 flex flex-col justify-between">
+                <div>
+                    <span class="text-xs font-semibold uppercase tracking-wider text-slate-500">20 Temmuz Testleri</span>
+                    <div class="flex items-baseline gap-2 mt-2">
+                        <span class="text-3xl font-extrabold text-rose-400">12 Yeni</span>
+                        <span class="text-xs text-slate-400">Bug Bulundu</span>
+                    </div>
+                    <p class="text-[11px] text-slate-400 mt-2">Pazartesi günü tamamlanan testlerde 12 yeni bug saptandı. Kayıtları Salı sabahı açılacaktır.</p>
+                </div>
+                <div class="mt-4 bg-rose-500/10 border border-rose-500/20 rounded-lg p-2 text-[10px] text-rose-300 text-center font-semibold">
+                    <span id="tuesday-pending-count">12 Hata Kaydı</span> Salı Sabahı JIRA'ya İşlenecek
+                </div>
+            </div>
+
+            <!-- KPI 3: Ongoing Tests -->
+            <div class="bg-slate-900 p-5 rounded-2xl border border-slate-800 flex flex-col justify-between">
+                <div>
+                    <span class="text-xs font-semibold uppercase tracking-wider text-slate-500">Devam Eden Testler</span>
+                    <div class="flex items-baseline gap-2 mt-2">
+                        <span class="text-3xl font-extrabold text-indigo-400">5 Madde</span>
+                    </div>
+                    <p class="text-[11px] text-slate-400 mt-2">Uygulama genelinde anlık olarak doğrulamaları ve testleri süren 5 kritik iş kalemi bulunmaktadır.</p>
+                </div>
+                <div class="mt-4 bg-indigo-500/10 border border-indigo-500/20 rounded-lg p-2 text-[10px] text-indigo-300 text-center font-medium">
+                    Test Akışı Aktif
+                </div>
+            </div>
+
+            <!-- KPI 4: Test Backlog Queue -->
+            <div class="bg-slate-900 p-5 rounded-2xl border border-slate-800 flex flex-col justify-between">
+                <div>
+                    <span class="text-xs font-semibold uppercase tracking-wider text-slate-500">Eritilmesi Gereken Backlog</span>
+                    <div class="flex items-baseline gap-2 mt-2">
+                        <span class="text-3xl font-extrabold text-amber-400">~15 Madde</span>
+                        <span class="text-xs text-slate-400">Sırada</span>
+                    </div>
+                    <p class="text-[11px] text-slate-400 mt-2">Backlog üzerinde test edilmeyi bekleyen yaklaşık 15 adet madde erimeyi beklemektedir.</p>
+                </div>
+                <div class="mt-4">
+                    <div class="flex justify-between text-[10px] text-slate-500 mb-1">
+                        <span>Kuyruk Yoğunluğu</span>
+                        <span>Yüksek</span>
+                    </div>
+                    <div class="w-full bg-slate-850 h-1.5 rounded-full overflow-hidden">
+                        <div class="bg-amber-400 h-full rounded-full animate-pulse-fast" style="width: 75%"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </div>
+
+</main>
+
+<!-- Footer -->
+<footer class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-16 pt-8 border-t border-slate-900 text-center text-xs text-slate-500">
+    <p>© 2026 QA & Agile Management Co. Tüm Hakları Saklıdır.</p>
+    <p class="mt-1">Dinamik Hybris Backlog & Yeni Mobil App Çift Proje Yönetim Arayüzü.</p>
+</footer>
+
+<script>
+    // Data and State Configuration
+    const state = {
+        activeProject: 'hybris', // 'hybris' or 'mobilapp'
+        modules: [
+            { id: 'product', name: 'Product', total: 67, y2025: 38, color: 'text-teal-400', bg: 'bg-teal-500' },
+            { id: 'orf', name: 'ORF', total: 53, y2025: 23, color: 'text-indigo-400', bg: 'bg-indigo-500' },
+            { id: 'customer', name: 'Customer', total: 39, y2025: 19, color: 'text-emerald-400', bg: 'bg-emerald-500' },
+            { id: 'checkout', name: 'Checkout', total: 26, y2025: 9, color: 'text-rose-400', bg: 'bg-rose-500' },
+            { id: 'mobile', name: 'Mobile', total: 46, y2025: 36, color: 'text-violet-400', bg: 'bg-violet-500' }
+        ],
+        avgMinutes: 20,
+        workingHoursPerDay: 8,
+        completedBugs: 0,
+        sortField: 'total', // 'total' or 'y2025'
+        sortOrder: 'desc', // 'asc' or 'desc'
+        simulationStep: 1,
+        selectedPlatforms: [],
+        simulationDecision: '',
+        simulationLog: [],
+        checklist: [
+            { id: 1, text: "90 günden fazla pasif bekleyen buglar için aylık zorunlu gözden geçirme.", checked: false, impact: "Yüksek", category: "Süreç" },
+            { id: 2, text: "Release sonrasında doğrulanan bugların en geç 1 sprint içinde kapatılması.", checked: false, impact: "Yüksek", category: "Hız" },
+            { id: 3, text: "Yapılmayacak bugların yıllarca 'Open' kalmak yerine 'Won't Fix' veya 'Obsolete' yapılması.", checked: false, impact: "Orta", category: "Hijyen" },
+            { id: 4, text: "Performans ve Teknik Borç işlerinin bug yerine Improvement/Tech Debt olarak yönetilmesi.", checked: false, impact: "Orta", category: "Sınıflandırma" },
+            { id: 5, text: "Duplicate kayıtların birleştirilip tek referans bug üzerinden takip edilmesi.", checked: false, impact: "Yüksek", category: "Hijyen" },
+            { id: 6, text: "Her çeyrekte bir 'Backlog Temizlik Günü' düzenlenmesi.", checked: false, impact: "Kritik", category: "Kültür" }
+        ],
+        activeTab: 'all',
+
+        // Hybris simulator issues pool
+        simulatorBugs: [
+            { id: 'BUG-2025-084', date: '14.04.2025', moduleId: 'checkout', title: "Sepet Sayfasında Mobil Cihazlarda 'Ödeme Yap' Butonunun Tıklanamaması", desc: "Safari mobil tarayıcısında ödeme sayfasına gitmek istediğinde buton alt menünün altında kalıyor." },
+            { id: 'BUG-2025-112', date: '02.06.2025', moduleId: 'customer', title: "Üyelik Kayıt Formunda E-posta Doğrulama Hatası", desc: "Android platformunda üyelik formunda bazı uzantılardaki geçerli e-postalar geçersiz olarak algılanıyor." },
+            { id: 'BUG-2025-149', date: '21.08.2025', moduleId: 'product', title: "Favori Listesinden Ürün Çıkarırken Çökme Yaşanması", desc: "iOS uygulamasında, favorilerden ardı ardına ürün silindiğinde bellek sızıntısı sebebiyle uygulama kapanıyor." },
+            { id: 'BUG-2025-198', date: '11.11.2025', moduleId: 'orf', title: "Fatura Adresi Güncellenirken Sunucu Hatası (500)", desc: "Web arayüzünde fatura adresi güncellenirken posta kodu alanı boş bırakıldığında hata fırlatıyor." },
+            { id: 'BUG-2025-234', date: '29.12.2025', moduleId: 'mobile', title: "Kupon Kodu Uygulandıktan Sonra İndirimin Yansımaması", desc: "Mobile Web üzerinde indirim kuponu girildiğinde başarı mesajı dönmesine rağmen fiyat değişmiyor." }
+        ],
+        currentSimBugIndex: 0,
+
+        // MOBILE APP SPECIFIC STATE
+        mobExcelOpenBugs: 2,
+        mobExcelTotalBugs: 40,
+        mobOngoingTests: 5,
+        mobBacklogTests: 15,
+        mobQAEngineers: 1,
+
+        // 12 New Bugs discovered on 20 July
+        mobNewBulgular: [
+            { title: "iOS 16 Giriş Ekranında Klavye Açılmıyor", desc: "Mobile App yeni üye onboarding akışında klavye input alanına tıklandığında viewport kayıyor ve kilitleniyor." },
+            { title: "Push Notification Deep Link Hatası", desc: "Android cihazlarda gelen kupon bildirimi tıklandığında sepet yerine profil ekranına yönlendiriyor." },
+            { title: "Profil Resim Yükleme Sırasında Çökme", desc: "Kullanıcı PNG formatında büyük boyutlu görsel eklediğinde bellek yetersizliğinden app kapanıyor." },
+            { title: "Dark Modda Sepet İndirimi Okunaksız", desc: "Koyu tema etkinken, indirim kuponu tutarı gri arka plana gri yazı olarak render ediliyor." },
+            { title: "Sipariş Özetinde KDV Yuvarlama Hatası", desc: "Fatura kesim simülasyonunda kuruşlu yuvarlamalar sepet tutarı ile eşleşmiyor." },
+            { title: "Android Geri Butonu App'ten Çıkış Fırlatıyor", desc: "Checkout aşamasında geri butonuna basıldığında bir önceki adıma gitmek yerine app sonlandırılıyor." },
+            { title: "Kupon Kodu Geçersiz Boşluk Hatası", desc: "Kullanıcı kopyala-yapıştır ile sonunda boşluk bıraktığında kupon geçersiz sayılıyor." },
+            { title: "Adres Seçiminde Harita Yüklenmeme Problemi", desc: "iOS platformunda konum yetkisi verildiğinde bile harita modalı boş (gri) olarak açılıyor." },
+            { title: "Mobil Fatura Gönderimi Mail Hatası", desc: "E-fatura talep edildiğinde arkada sunucudan 503 Service Unavailable hatası alınıyor." },
+            { title: "Hızlı Ödemede Kayıtlı Kart Listelenmiyor", desc: "Kullanıcının daha önce sakladığı kredi kartları checkout sayfasında bazen boş dönüyor." },
+            { title: "Şifremi Unuttum Bağlantı Süresi Çok Kısa", desc: "Mail ile gönderilen sıfırlama token süresi 5 dakika yerine 30 saniyede geçersiz kalıyor." },
+            { title: "Çıkış Yap Butonu İki Kere Tetikleniyor", desc: "Logout butonuna art arda iki kez basıldığında null reference hatası fırlatılıyor." }
+        ],
+        mobLoggedBugsCount: 0,
+        mobLoggedHistory: []
+    };
+
+    // Custom Toast Notification Maker
+    function showToast(message, type = 'success') {
+        const container = document.getElementById('toast-container');
+        const toast = document.createElement('div');
+
+        toast.className = `p-4 rounded-xl shadow-lg text-xs font-semibold flex items-center gap-3 border transition-all duration-300 animate-fade-in ${
+            type === 'success'
+                ? 'bg-emerald-950/90 text-emerald-400 border-emerald-500/30'
+                : 'bg-rose-950/90 text-rose-400 border-rose-500/30'
+        }`;
+
+        const icon = type === 'success'
+            ? '<i class="fa-solid fa-circle-check text-base"></i>'
+            : '<i class="fa-solid fa-circle-exclamation text-base"></i>';
+
+        toast.innerHTML = `
+            ${icon}
+            <span class="flex-1">${message}</span>
+            <button onclick="this.parentElement.remove()" class="text-slate-400 hover:text-white bg-transparent border-0 cursor-pointer">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        `;
+
+        container.appendChild(toast);
+        setTimeout(() => {
+            toast.classList.add('opacity-0');
+            setTimeout(() => toast.remove(), 300);
+        }, 4000);
+    }
+
+    // Project Switcher Tab Mechanism
+    function switchProject(projectKey) {
+        state.activeProject = projectKey;
+
+        const btnHybris = document.getElementById('project-tab-hybris');
+        const btnMobilApp = document.getElementById('project-tab-mobilapp');
+        const viewHybris = document.getElementById('project-hybris-view');
+        const viewMobilApp = document.getElementById('project-mobilapp-view');
+
+        if (projectKey === 'hybris') {
+            btnHybris.className = "px-4 py-2 rounded-lg text-xs font-bold transition-all flex items-center gap-2 bg-emerald-500 text-slate-950";
+            btnMobilApp.className = "px-4 py-2 rounded-lg text-xs font-bold transition-all flex items-center gap-2 text-slate-400 hover:text-white";
+            viewHybris.classList.remove('hidden');
+            viewMobilApp.classList.add('hidden');
+            showToast("Hybris 2025 Backlog Yönetim Alanına Geçildi.", "success");
+        } else {
+            btnMobilApp.className = "px-4 py-2 rounded-lg text-xs font-bold transition-all flex items-center gap-2 bg-indigo-500 text-white";
+            btnHybris.className = "px-4 py-2 rounded-lg text-xs font-bold transition-all flex items-center gap-2 text-slate-400 hover:text-white";
+            viewMobilApp.classList.remove('hidden');
+            viewHybris.classList.add('hidden');
+            showToast("Yeni Mobil App Süreç İzleme Alanına Geçildi.", "success");
+        }
+        updateCalculationsAndUI();
+    }
+
+    // Render Hybris Modules Table based on sorting criteria
+    function renderModulesTable() {
+        const tableBody = document.getElementById('modules-table-body');
+        if(!tableBody) return;
+        tableBody.innerHTML = '';
+
+        // Sort modules array copy
+        const sorted = [...state.modules].sort((a, b) => {
+            let valA = a[state.sortField];
+            let valB = b[state.sortField];
+            if (state.sortOrder === 'asc') {
+                return valA > valB ? 1 : -1;
+            } else {
+                return valA < valB ? 1 : -1;
+            }
+        });
+
+        sorted.forEach(item => {
+            const percentage = item.total > 0 ? Math.round((item.y2025 / item.total) * 100) : 0;
+            const row = document.createElement('tr');
+            row.className = 'hover:bg-slate-950/40 transition-all duration-300 group';
+            row.innerHTML = `
+                <td class="py-4 pl-4 font-bold text-white flex items-center gap-2.5">
+                    <span class="w-2 h-2 rounded-full ${item.bg}"></span>
+                    ${item.name}
+                </td>
+                <td class="py-4 text-center font-semibold text-slate-100">${item.total}</td>
+                <td class="py-4 text-center font-bold text-emerald-400">${item.y2025}</td>
+                <td class="py-4 text-center font-medium text-slate-400">${item.total - item.y2025}</td>
+                <td class="py-4 pr-4">
+                    <div class="flex items-center gap-3">
+                        <span class="w-10 text-right font-mono text-slate-400">${percentage}%</span>
+                        <div class="flex-1 bg-slate-800/80 h-2 rounded-full overflow-hidden">
+                            <div class="h-full rounded-full ${item.bg} transition-all duration-500" style="width: ${percentage}%"></div>
+                        </div>
+                    </div>
+                </td>
+            `;
+            tableBody.appendChild(row);
+        });
+    }
+
+    // Sort handling
+    function handleSort(field) {
+        if (state.sortField === field) {
+            state.sortOrder = state.sortOrder === 'asc' ? 'desc' : 'asc';
+        } else {
+            state.sortField = field;
+            state.sortOrder = 'desc';
+        }
+
+        const totalBtn = document.getElementById('sort-total-btn');
+        const y2025Btn = document.getElementById('sort-y2025-btn');
+
+        if (state.sortField === 'total') {
+            totalBtn.className = 'px-3 py-1.5 rounded-lg font-medium transition-all bg-slate-850 text-white border border-slate-700/50';
+            totalBtn.innerHTML = `Toplam Bug'a Göre ${state.sortOrder === 'asc' ? '▲' : '▼'}`;
+            y2025Btn.className = 'px-3 py-1.5 rounded-lg font-medium transition-all text-slate-400';
+            y2025Btn.innerText = '2025 Bug Sayısı';
+        } else {
+            y2025Btn.className = 'px-3 py-1.5 rounded-lg font-medium transition-all bg-slate-850 text-white border border-slate-700/50';
+            y2025Btn.innerHTML = `2025 Bug Sayısı ${state.sortOrder === 'asc' ? '▲' : '▼'}`;
+            totalBtn.className = 'px-3 py-1.5 rounded-lg font-medium transition-all text-slate-400';
+            totalBtn.innerText = 'Toplam Bug\'a Göre';
+        }
+
+        renderModulesTable();
+    }
+
+    // Calculate and synchronize computations for both projects
+    function updateCalculationsAndUI() {
+        // 1. HYBRIS PROJECT COMPUTATIONS
+        const bugCount2025 = state.modules.reduce((sum, item) => sum + item.y2025, 0);
+
+        const totalMinutes = bugCount2025 * state.avgMinutes;
+        const totalHours = (totalMinutes / 60).toFixed(1);
+        const personDays = (totalHours / state.workingHoursPerDay).toFixed(1);
+
+        const preset15 = ((125 * 15) / 60 / state.workingHoursPerDay).toFixed(1);
+        const preset20 = ((125 * 20) / 60 / state.workingHoursPerDay).toFixed(1);
+        const preset25 = ((125 * 25) / 60 / state.workingHoursPerDay).toFixed(1);
+
+        // Sync Hybris Dom
+        document.getElementById('display-minutes').innerText = `${state.avgMinutes} Dakika`;
+        document.getElementById('display-working-hours').innerText = `${state.workingHoursPerDay} Saat`;
+        document.getElementById('kpi-total-hours').innerText = totalHours;
+        document.getElementById('kpi-hours-desc').innerText = `${bugCount2025} adet kalan bug'ın her biri ortalama ${state.avgMinutes} dakikada çözülürse gereken süre.`;
+        document.getElementById('display-completed-bugs').innerText = `Temizlenen Bug: ${state.completedBugs} / 125`;
+
+        const progressPercent = (state.completedBugs / 125) * 100;
+        document.getElementById('kpi-progress-bar').style.width = `${progressPercent}%`;
+        document.getElementById('kpi-person-days').innerText = personDays;
+        document.getElementById('kpi-eta-pill').innerText = `Tahmini tamamlanma: ~ ${Math.ceil(personDays)} İş Günü`;
+
+        document.getElementById('preset-15-val').innerText = `~${preset15} A/G`;
+        document.getElementById('preset-20-val').innerText = `~${preset20} A/G`;
+        document.getElementById('preset-25-val').innerText = `~${preset25} A/G`;
+
+        if (document.getElementById('log-remaining-hours')) {
+            document.getElementById('log-remaining-hours').innerText = totalHours;
+        }
+
+        // Hybris checklist olgunluk
+        const checkedCount = state.checklist.filter(item => item.checked).length;
+        const score = Math.round((checkedCount / state.checklist.length) * 100);
+        const offset = 175.9 - (175.9 * score) / 100;
+        document.getElementById('maturity-circle').setAttribute('stroke-dashoffset', offset);
+        document.getElementById('maturity-score-text').innerText = `${score}%`;
+
+        let statusText = "Kural Seçilmedi";
+        if (score > 0 && score <= 35) statusText = "Başlangıç Seviye";
+        else if (score > 35 && score <= 70) statusText = "İyi Durumda";
+        else if (score > 70 && score < 100) statusText = "Çok Güçlü";
+        else if (score === 100) statusText = "Kusursuz Operasyon";
+        document.getElementById('maturity-status-text').innerText = statusText;
+
+        // 2. MOBILE APP PROJECT COMPUTATIONS
+        const tuesdayPendingSpan = document.getElementById('tuesday-pending-count');
+        if (tuesdayPendingSpan) {
+            tuesdayPendingSpan.innerText = `12 Hata Kaydı`;
+        }
+    }
+
+    // Render Hybris Checklist
+    function renderChecklist() {
+        const container = document.getElementById('checklist-container');
+        if(!container) return;
+        container.innerHTML = '';
+
+        state.checklist.forEach(item => {
+            const card = document.createElement('div');
+            card.onclick = () => toggleChecklistItem(item.id);
+            card.className = `p-4 rounded-xl border cursor-pointer transition-all flex items-start gap-4 select-none ${
+                item.checked
+                    ? 'bg-emerald-500/10 border-emerald-500/30'
+                    : 'bg-slate-950 border-slate-850 hover:border-slate-800'
+            }`;
+
+            const impactClass = item.impact === 'Kritik' ? 'bg-rose-950 text-rose-400 border border-rose-900/30' :
+                                item.impact === 'Yüksek' ? 'bg-amber-950 text-amber-400 border border-amber-900/30' :
+                                'bg-slate-900 text-slate-400 border border-slate-800';
+
+            card.innerHTML = `
+                <div class="w-5 h-5 rounded-md flex items-center justify-center border mt-0.5 shrink-0 transition-all ${
+                    item.checked
+                        ? 'bg-emerald-500 border-emerald-400 text-slate-950'
+                        : 'border-slate-700 bg-slate-900'
+                }">
+                    ${item.checked ? '<i class="fa-solid fa-check text-xs font-bold"></i>' : ''}
+                </div>
+                <div>
+                    <div class="flex gap-2 items-center mb-1">
+                        <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-900 border border-slate-800 text-slate-400">${item.category}</span>
+                        <span class="text-[10px] px-1.5 py-0.5 rounded font-semibold ${impactClass}">Etki: ${item.impact}</span>
+                    </div>
+                    <p class="text-xs sm:text-sm text-slate-300 leading-normal font-light">${item.text}</p>
+                </div>
+            `;
+            container.appendChild(card);
+        });
+    }
+
+    function toggleChecklistItem(id) {
+        state.checklist = state.checklist.map(item =>
+            item.id === id ? { ...item, checked: !item.checked } : item
+        );
+        renderChecklist();
+        updateCalculationsAndUI();
+    }
+
+    // Tab Filtration for Strategy Matrix
+    function setTab(tabKey) {
+        state.activeTab = tabKey;
+
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.className = 'tab-btn px-3 py-1.5 rounded-lg font-medium transition-all shrink-0 text-slate-400 hover:text-slate-200';
+        });
+        document.getElementById(`tab-${tabKey}`).className = 'tab-btn px-3 py-1.5 rounded-lg font-medium transition-all shrink-0 bg-slate-800 text-white';
+
+        const cardWeb = document.getElementById('platform-card-web');
+        const cardMWeb = document.getElementById('platform-card-mweb');
+        const cardAndroid = document.getElementById('platform-card-android');
+        const cardIOS = document.getElementById('platform-card-ios');
+
+        if (tabKey === 'all') {
+            cardWeb.style.display = 'flex';
+            cardMWeb.style.display = 'flex';
+            cardAndroid.style.display = 'flex';
+            cardIOS.style.display = 'flex';
+        } else if (tabKey === 'web') {
+            cardWeb.style.display = 'flex';
+            cardMWeb.style.display = 'flex';
+            cardAndroid.style.display = 'none';
+            cardIOS.style.display = 'none';
+        } else if (tabKey === 'app') {
+            cardWeb.style.display = 'none';
+            cardMWeb.style.display = 'none';
+            cardAndroid.style.display = 'flex';
+            cardIOS.style.display = 'flex';
+        }
+    }
+
+    // Hybris Simulator Logic
+    function togglePlatform(platform) {
+        if (state.selectedPlatforms.includes(platform)) {
+            state.selectedPlatforms = state.selectedPlatforms.filter(p => p !== platform);
+            const btn = document.getElementById(`btn-platform-${platform.replace(' ', '-')}`);
+            btn.classList.remove('bg-indigo-500/10', 'border-indigo-500', 'text-indigo-400', 'font-semibold');
+            btn.classList.add('bg-slate-900', 'border-slate-800', 'text-slate-400');
+            btn.querySelector('.dot').className = 'dot w-1.5 h-1.5 rounded-full bg-transparent';
+        } else {
+            state.selectedPlatforms.push(platform);
+            const btn = document.getElementById(`btn-platform-${platform.replace(' ', '-')}`);
+            btn.classList.add('bg-indigo-500/10', 'border-indigo-500', 'text-indigo-400', 'font-semibold');
+            btn.classList.remove('bg-slate-900', 'border-slate-800', 'text-slate-400');
+            btn.querySelector('.dot').className = 'dot w-1.5 h-1.5 rounded-full bg-indigo-400';
+        }
+    }
+
+    function selectDecision(decision) {
+        state.simulationDecision = decision;
+
+        document.querySelectorAll('.decision-btn').forEach(btn => {
+            btn.classList.remove('ring-2', 'ring-emerald-500', 'font-semibold');
+        });
+
+        const btnIdMap = {
+            'Devam Ediyor': 'decision-devam',
+            'Düzelmiş': 'decision-duzelmis',
+            'Duplicate': 'decision-duplicate',
+            'Won\'t Fix': 'decision-wontfix',
+            'Obsolete': 'decision-obsolete',
+            'Improvement Olarak Taşı': 'decision-improvement'
+        };
+
+        document.getElementById(btnIdMap[decision]).classList.add('ring-2', 'ring-emerald-500', 'font-semibold');
+    }
+
+    function renderNextSimulatorBug() {
+        state.currentSimBugIndex = (state.currentSimBugIndex + 1) % state.simulatorBugs.length;
+        const nextBug = state.simulatorBugs[state.currentSimBugIndex];
+
+        document.getElementById('simulator-bug-id').innerText = nextBug.id;
+        document.getElementById('simulator-bug-module').innerText = `Modül: ${nextBug.moduleId}`;
+        document.getElementById('simulator-bug-date').innerText = `Oluşturma: ${nextBug.date}`;
+        document.getElementById('simulator-bug-title').innerText = nextBug.title;
+        document.getElementById('simulator-bug-desc').innerText = `"${nextBug.desc}"`;
+    }
+
+    function handleSimulationNext() {
+        if (state.simulationStep === 1) {
+            if (state.selectedPlatforms.length === 0) {
+                showToast("Lütfen en az bir test platformu seçin.", "error");
+                return;
+            }
+
+            state.simulationStep = 2;
+            document.getElementById('sim-step-1-container').classList.add('hidden');
+            document.getElementById('sim-step-2-container').classList.remove('hidden');
+
+            document.getElementById('sim-indicator-step-1').className = 'h-1 flex-1 rounded-full bg-slate-800 transition-all duration-300';
+            document.getElementById('sim-indicator-step-2').className = 'h-1 flex-1 rounded-full bg-emerald-500 transition-all duration-300';
+
+            document.getElementById('btn-submit-text').innerText = 'Doğrulamayı Bitir ve Kaydet';
+        } else if (state.simulationStep === 2) {
+            if (!state.simulationDecision) {
+                showToast("Lütfen bir aksiyon kararı verin.", "error");
+                return;
+            }
+
+            const activeBug = state.simulatorBugs[state.currentSimBugIndex];
+
+            // Decrement counts from active module
+            state.modules = state.modules.map(mod => {
+                if (mod.id === activeBug.moduleId) {
+                    return {
+                        ...mod,
+                        y2025: Math.max(0, mod.y2025 - 1),
+                        total: Math.max(0, mod.total - 1)
+                    };
+                }
+                return mod;
+            });
+
+            state.completedBugs = Math.min(125, state.completedBugs + 1);
+
+            const logEntry = {
+                id: Date.now(),
+                bugId: activeBug.id,
+                title: activeBug.title,
+                platforms: state.selectedPlatforms.join(', '),
+                decision: state.simulationDecision,
+                time: new Date().toLocaleTimeString('tr-TR')
+            };
+
+            state.simulationLog.unshift(logEntry);
+            renderSimulationLogs();
+
+            showToast(`${activeBug.id} kaydı başarıyla arındırıldı ve JIRA güncellendi.`, "success");
+
+            // Reset simulator progress
+            state.simulationStep = 1;
+            state.selectedPlatforms = [];
+            state.simulationDecision = '';
+
+            document.querySelectorAll('.platform-btn').forEach(btn => {
+                btn.className = 'platform-btn px-3 py-2 text-xs rounded-lg border text-left flex items-center justify-between transition-all bg-slate-900 border-slate-800 text-slate-400';
+                btn.querySelector('.dot').className = 'dot w-1.5 h-1.5 rounded-full bg-transparent';
+            });
+
+            document.querySelectorAll('.decision-btn').forEach(btn => {
+                btn.classList.remove('ring-2', 'ring-emerald-500', 'font-semibold');
+            });
+
+            document.getElementById('sim-step-1-container').classList.remove('hidden');
+            document.getElementById('sim-step-2-container').classList.add('hidden');
+
+            document.getElementById('sim-indicator-step-1').className = 'h-1 flex-1 rounded-full bg-emerald-500 transition-all duration-300';
+            document.getElementById('sim-indicator-step-2').className = 'h-1 flex-1 rounded-full bg-slate-800 transition-all duration-300';
+
+            document.getElementById('btn-submit-text').innerText = 'Sonraki Adıma Geç';
+
+            renderNextSimulatorBug();
+            renderModulesTable();
+            updateCalculationsAndUI();
+        }
+    }
+
+    function renderSimulationLogs() {
+        const logsWrapper = document.getElementById('sim-logs-wrapper');
+        const logsContainer = document.getElementById('sim-logs-container');
+        const logsCountSpan = document.getElementById('sim-logs-count');
+
+        if (state.simulationLog.length === 0) {
+            logsWrapper.classList.add('hidden');
+            return;
+        }
+
+        logsWrapper.classList.remove('hidden');
+        logsCountSpan.innerText = state.simulationLog.length;
+        logsContainer.innerHTML = '';
+
+        state.simulationLog.forEach(log => {
+            const logCard = document.createElement('div');
+            logCard.className = 'bg-slate-950 px-4 py-2.5 rounded-lg border border-slate-850 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 text-xs animate-fade-in';
+            logCard.innerHTML = `
+                <div class="flex items-center gap-3">
+                    <span class="font-mono text-emerald-400 font-semibold">${log.bugId}</span>
+                    <span class="text-slate-400">Başlık: <strong class="text-slate-300 font-normal">${log.title}</strong></span>
+                </div>
+                <div class="flex items-center gap-3 justify-between w-full sm:w-auto">
+                    <span class="px-2 py-0.5 rounded bg-slate-850 border border-slate-800 text-slate-300 font-semibold">${log.decision}</span>
+                    <span class="text-slate-600">${log.time}</span>
+                </div>
+            `;
+            logsContainer.appendChild(logCard);
+        });
+    }
+
+    function resetSimulatorProgress() {
+        state.completedBugs = 0;
+        state.simulationLog = [];
+        state.simulationStep = 1;
+        state.selectedPlatforms = [];
+        state.simulationDecision = '';
+
+        state.modules = [
+            { id: 'product', name: 'Product', total: 67, y2025: 38, color: 'text-teal-400', bg: 'bg-teal-500' },
+            { id: 'orf', name: 'ORF', total: 53, y2025: 23, color: 'text-indigo-400', bg: 'bg-indigo-500' },
+            { id: 'customer', name: 'Customer', total: 39, y2025: 19, color: 'text-emerald-400', bg: 'bg-emerald-500' },
+            { id: 'checkout', name: 'Checkout', total: 26, y2025: 9, color: 'text-rose-400', bg: 'bg-rose-500' },
+            { id: 'mobile', name: 'Mobile', total: 46, y2025: 36, color: 'text-violet-400', bg: 'bg-violet-500' }
+        ];
+        state.currentSimBugIndex = 0;
+
+        document.querySelectorAll('.platform-btn').forEach(btn => {
+            btn.className = 'platform-btn px-3 py-2 text-xs rounded-lg border text-left flex items-center justify-between transition-all bg-slate-900 border-slate-800 text-slate-400';
+            btn.querySelector('.dot').className = 'dot w-1.5 h-1.5 rounded-full bg-transparent';
+        });
+
+        document.querySelectorAll('.decision-btn').forEach(btn => {
+            btn.classList.remove('ring-2', 'ring-emerald-500', 'font-semibold');
+        });
+
+        document.getElementById('sim-step-1-container').classList.remove('hidden');
+        document.getElementById('sim-step-2-container').classList.add('hidden');
+        document.getElementById('sim-indicator-step-1').className = 'h-1 flex-1 rounded-full bg-emerald-500 transition-all duration-300';
+        document.getElementById('sim-indicator-step-2').className = 'h-1 flex-1 rounded-full bg-slate-800 transition-all duration-300';
+        document.getElementById('btn-submit-text').innerText = 'Sonraki Adıma Geç';
+
+        const initialBug = state.simulatorBugs[0];
+        document.getElementById('simulator-bug-id').innerText = initialBug.id;
+        document.getElementById('simulator-bug-module').innerText = `Modül: ${initialBug.moduleId}`;
+        document.getElementById('simulator-bug-date').innerText = `Oluşturma: ${initialBug.date}`;
+        document.getElementById('simulator-bug-title').innerText = initialBug.title;
+        document.getElementById('simulator-bug-desc').innerText = `"${initialBug.desc}"`;
+
+        renderSimulationLogs();
+        renderModulesTable();
+        updateCalculationsAndUI();
+        showToast("Hybris simülasyon ve modül verileri başarıyla sıfırlandı.", "success");
+    }
+
+
+    // MOBILE APP PROJECT SPECIFIC LOGIC
+    function renderNextTuesdayBug() {
+        const tuesdayCount = state.mobNewBulgular.length;
+        const card = document.getElementById('tuesday-log-card');
+        if(!card) return; // Prevent Null Errors on initialization
+
+        const btnSingle = document.getElementById('btn-log-single');
+        const btnAll = document.getElementById('btn-log-all');
+
+        if (state.mobLoggedBugsCount >= tuesdayCount) {
+            card.innerHTML = `
+                <div class="text-center py-6 animate-fade-in">
+                    <i class="fa-solid fa-circle-check text-emerald-400 text-3xl mb-2"></i>
+                    <h4 class="text-xs font-bold text-slate-200">Tüm Bulgular JIRA'ya İşlendi!</h4>
+                    <p class="text-[10px] text-slate-400 mt-1">20 Temmuz testlerinde keşfedilen 12 yeni kaydın tamamı Salı sabahı JIRA'ya aktarılmıştır.</p>
+                </div>
+            `;
+
+            if (btnSingle) {
+                btnSingle.disabled = true;
+                btnSingle.classList.add('opacity-40', 'cursor-not-allowed');
+            }
+            if (btnAll) {
+                btnAll.disabled = true;
+                btnAll.classList.add('opacity-40', 'cursor-not-allowed');
+            }
+            return;
+        }
+
+        if (btnSingle) {
+            btnSingle.disabled = false;
+            btnSingle.classList.remove('opacity-40', 'cursor-not-allowed');
+        }
+        if (btnAll) {
+            btnAll.disabled = false;
+            btnAll.classList.remove('opacity-40', 'cursor-not-allowed');
+        }
+
+        const currentBug = state.mobNewBulgular[state.mobLoggedBugsCount];
+        card.innerHTML = `
+            <div class="flex justify-between text-[10px] text-indigo-400 font-mono mb-1 animate-fade-in">
+                <span>TÜM BULGULAR ARASINDAN SIRADAKİ:</span>
+                <span>Pazartesi Bulgusu #${state.mobLoggedBugsCount + 1}</span>
+            </div>
+            <h4 class="text-xs font-bold text-slate-200 animate-fade-in" id="tuesday-log-title">${currentBug.title}</h4>
+            <p class="text-[10.5px] text-slate-400 mt-1 leading-normal animate-fade-in" id="tuesday-log-desc">${currentBug.desc}</p>
+        `;
+    }
+
+    function logSingleTuesdayBug() {
+        if (state.mobLoggedBugsCount >= state.mobNewBulgular.length) return;
+
+        const activeBug = state.mobNewBulgular[state.mobLoggedBugsCount];
+        const jiraId = `JIRA-MOB-${100 + state.mobLoggedBugsCount}`;
+
+        // Add to logging history list
+        const logItem = {
+            id: jiraId,
+            title: activeBug.title,
+            time: new Date().toLocaleTimeString('tr-TR'),
+            status: 'JIRA Açıldı'
+        };
+
+        state.mobLoggedHistory.unshift(logItem);
+        state.mobLoggedBugsCount += 1;
+
+        renderNextTuesdayBug();
+        renderMobLoggedHistory();
+        updateCalculationsAndUI();
+        showToast(`${jiraId} kaydı başarıyla JIRA'ya aktarıldı.`, "success");
+    }
+
+    function logAllTuesdayBugs() {
+        const startIdx = state.mobLoggedBugsCount;
+        const totalToLog = state.mobNewBulgular.length;
+
+        if (startIdx >= totalToLog) {
+            showToast("Daha fazla kaydedilecek bulgu kalmadı.", "error");
+            return;
+        }
+
+        for (let i = startIdx; i < totalToLog; i++) {
+            const activeBug = state.mobNewBulgular[i];
+            const jiraId = `JIRA-MOB-${100 + i}`;
+
+            state.mobLoggedHistory.unshift({
+                id: jiraId,
+                title: activeBug.title,
+                time: new Date().toLocaleTimeString('tr-TR'),
+                status: 'JIRA Açıldı'
+            });
+        }
+
+        state.mobLoggedBugsCount = totalToLog;
+        renderNextTuesdayBug();
+        renderMobLoggedHistory();
+        updateCalculationsAndUI();
+        showToast("Geriye kalan tüm yeni bulgular JIRA'ya toplu olarak kaydedildi!", "success");
+    }
+
+
+    function renderMobLoggedHistory() {
+        const container = document.getElementById('mob-logs-container');
+        const wrapper = document.getElementById('mob-logs-wrapper');
+        const counter = document.getElementById('mob-logs-count');
+
+        if (state.mobLoggedHistory.length === 0) {
+            wrapper.classList.add('hidden');
+            return;
+        }
+
+        wrapper.classList.remove('hidden');
+        counter.innerText = state.mobLoggedHistory.length;
+        container.innerHTML = '';
+
+        state.mobLoggedHistory.forEach(log => {
+            const row = document.createElement('div');
+            row.className = "bg-slate-950 px-4 py-2.5 rounded-lg border border-slate-850 flex items-center justify-between text-xs animate-fade-in";
+            row.innerHTML = `
+                <div class="flex items-center gap-3">
+                    <span class="font-mono text-indigo-400 font-semibold">${log.id}</span>
+                    <span class="text-slate-400">Bulgu: <strong class="text-slate-300 font-normal">${log.title}</strong></span>
+                </div>
+                <div class="flex items-center gap-3">
+                    <span class="px-2 py-0.5 rounded bg-indigo-550/10 text-indigo-400 border border-indigo-500/20 text-[10px] font-semibold">${log.status}</span>
+                    <span class="text-slate-600">${log.time}</span>
+                </div>
+            `;
+            container.appendChild(row);
+        });
+    }
+
+    function resetTuesdayJiraLogger() {
+        state.mobLoggedBugsCount = 0;
+        state.mobLoggedHistory = [];
+        renderNextTuesdayBug();
+        renderMobLoggedHistory();
+        updateCalculationsAndUI();
+        showToast("Mobil App JIRA kayıt geçmişi sıfırlandı.", "success");
+    }
+
+
+    // Sliders Listeners
+    document.getElementById('input-avg-minutes').addEventListener('input', (e) => {
+        state.avgMinutes = parseInt(e.target.value);
+        updateCalculationsAndUI();
+    });
+
+    document.getElementById('input-working-hours').addEventListener('input', (e) => {
+        state.workingHoursPerDay = parseInt(e.target.value);
+        updateCalculationsAndUI();
+    });
+
+    // Initialize App on Window Load
+    window.onload = function() {
+        renderModulesTable();
+        renderChecklist();
+        updateCalculationsAndUI();
+        showToast("Süreç Analiz & Bug Yönetim Paneli Hazır.", "success");
+    };
+</script>
+
+</body>
+</html>
