@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="tr" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Haftalık Mobil App Bug ve Kalite Raporu</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                            900: '#1e3a8a',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #020617;
+            color: #f8fafc;
+            font-family: 'Inter', sans-serif;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .glass-card {
+            background: rgba(15, 23, 42, 0.75);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(51, 65, 85, 0.6);
+        }
+        .glass-card-hover:hover {
+            border-color: rgba(99, 102, 241, 0.4);
+            box-shadow: 0 10px 25px -5px rgba(99, 102, 241, 0.1);
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-slate-950 text-slate-100 antialiased p-4 sm:p-6 md:p-8 custom-scrollbar">
+
+    <div class="max-w-7xl mx-auto space-y-8">
+        
+        <!-- Header -->
+        <header class="border-b border-slate-800 pb-6 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+            <div>
+                <div class="flex flex-wrap items-center gap-3">
+                    <span class="px-3 py-1 text-xs font-semibold rounded-full bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 flex items-center gap-1.5">
+                        <i data-lucide="smartphone" class="w-3.5 h-3.5"></i> Mobil App Projesi
+                    </span>
+                    <span class="text-xs text-slate-400 flex items-center gap-1">
+                        <i data-lucide="calendar" class="w-3.5 h-3.5"></i> Rapor Tarihi: 24 Temmuz 2026
+                    </span>
+                </div>
+                <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-white mt-2">
+                    Haftalık Bug & Kalite Yönetici Raporu
+                </h1>
+                <p class="text-slate-400 text-sm mt-1">
+                    Test süreçleri, hata dağılımı, yönetim hedef analizi ve süreç iyileştirme aksiyonları.
+                </p>
+            </div>
+
+            <!-- Navigation Tabs -->
+            <div class="flex flex-wrap items-center gap-2 bg-slate-900 p-1.5 rounded-xl border border-slate-800">
+                <button onclick="switchTab('overview')" id="tab-btn-overview" 
+                    class="tab-btn active px-4 py-2 text-xs sm:text-sm font-semibold rounded-lg transition-all text-white bg-indigo-600 shadow-lg shadow-indigo-600/30 flex items-center gap-2">
+                    <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
+                    Dashboard & Analiz
+                </button>
+                <button onclick="switchTab('target-analysis')" id="tab-btn-target-analysis" 
+                    class="tab-btn px-4 py-2 text-xs sm:text-sm font-semibold rounded-lg transition-all text-slate-400 hover:text-white hover:bg-slate-800/60 flex items-center gap-2">
+                    <i data-lucide="target" class="w-4 h-4"></i>
+                    Hedef & Metrik Analizi
+                </button>
+                <button onclick="switchTab('action-plan')" id="tab-btn-action-plan" 
+                    class="tab-btn px-4 py-2 text-xs sm:text-sm font-semibold rounded-lg transition-all text-slate-400 hover:text-white hover:bg-slate-800/60 flex items-center gap-2">
+                    <i data-lucide="check-square" class="w-4 h-4"></i>
+                    Süreç İyileştirme (<span id="completed-count-badge">0</span>/5)
+                </button>
+            </div>
+        </header>
+
+        <!-- TAB 1: OVERVIEW -->
+        <main id="tab-overview" class="tab-content active space-y-6">
+
+            <!-- KPI Metric Cards -->
+            <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                
+                <!-- Total Bugs Card -->
+                <div class="glass-card glass-card-hover rounded-2xl p-5 relative overflow-hidden transition-all">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Toplam Bug Sayısı</p>
+                            <h3 class="text-3xl font-extrabold text-white mt-2">63</h3>
+                            <p class="text-xs text-amber-400 mt-1.5 flex items-center gap-1 font-medium">
+                                <i data-lucide="trending-up" class="w-3.5 h-3.5"></i> 17 Tem'den bu yana +23 Yeni
+                            </p>
+                        </div>
+                        <div class="p-3 bg-indigo-500/10 rounded-xl text-indigo-400 border border-indigo-500/20">
+                            <i data-lucide="bug" class="w-6 h-6"></i>
+                        </div>
+                    </div>
+                    <div class="mt-4 pt-3 border-t border-slate-800/80 flex justify-between text-xs text-slate-400 font-mono">
+                        <span>17 Tem: 40</span>
+                        <span>24 Tem: 63</span>
+                    </div>
+                </div>
+
+                <!-- Resolved Bugs Card -->
+                <div class="glass-card glass-card-hover rounded-2xl p-5 relative overflow-hidden transition-all">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Tamamlanan (Done)</p>
+                            <h3 class="text-3xl font-extrabold text-emerald-400 mt-2">42</h3>
+                            <p class="text-xs text-emerald-400 mt-1.5 flex items-center gap-1 font-medium">
+                                <i data-lucide="check-circle-2" class="w-3.5 h-3.5"></i> Bu Hafta +4 Fixlendi
+                            </p>
+                        </div>
+                        <div class="p-3 bg-emerald-500/10 rounded-xl text-emerald-400 border border-emerald-500/20">
+                            <i data-lucide="check-circle" class="w-6 h-6"></i>
+                        </div>
+                    </div>
+                    <div class="mt-4 pt-3 border-t border-slate-800/80 flex justify-between text-xs text-slate-400 font-mono">
+                        <span>Çözüm Oranı: %66.7</span>
+                        <span>17 Tem: 38</span>
+                    </div>
+                </div>
+
+                <!-- Open Bugs Card -->
+                <div class="glass-card glass-card-hover rounded-2xl p-5 relative overflow-hidden transition-all">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Açık Buglar (Open)</p>
+                            <h3 class="text-3xl font-extrabold text-rose-400 mt-2">19</h3>
+                            <p class="text-xs text-rose-400 mt-1.5 flex items-center gap-1 font-medium">
+                                <i data-lucide="clock" class="w-3.5 h-3.5"></i> Çözüm Bekleyen
+                            </p>
+                        </div>
+                        <div class="p-3 bg-rose-500/10 rounded-xl text-rose-400 border border-rose-500/20">
+                            <i data-lucide="alert-circle" class="w-6 h-6"></i>
+                        </div>
+                    </div>
+                    <div class="mt-4 pt-3 border-t border-slate-800/80 flex justify-between text-xs text-slate-400 font-mono">
+                        <span>17 Tem: 2 Open</span>
+                        <span>Net Artış: +17</span>
+                    </div>
+                </div>
+
+                <!-- Closed / Not A Bug Card -->
+                <div class="glass-card glass-card-hover rounded-2xl p-5 relative overflow-hidden transition-all">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Kapatılan (Bug Değil)</p>
+                            <h3 class="text-3xl font-extrabold text-slate-300 mt-2">2</h3>
+                            <p class="text-xs text-slate-400 mt-1.5 flex items-center gap-1 font-medium">
+                                <i data-lucide="x-circle" class="w-3.5 h-3.5"></i> İptal Edilen Kayıt
+                            </p>
+                        </div>
+                        <div class="p-3 bg-slate-800 rounded-xl text-slate-400 border border-slate-700">
+                            <i data-lucide="ban" class="w-6 h-6"></i>
+                        </div>
+                    </div>
+                    <div class="mt-4 pt-3 border-t border-slate-800/80 flex justify-between text-xs text-slate-400 font-mono">
+                        <span>Gerekçe: Geçersiz</span>
+                        <span>Oran: %3.1</span>
+                    </div>
+                </div>
+
+            </section>
+
+            <!-- Critical Blocker Notice Banner -->
+            <section class="bg-gradient-to-r from-rose-950/40 via-amber-950/30 to-slate-900 border border-amber-500/40 rounded-2xl p-5 sm:p-6 relative overflow-hidden">
+                <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
+                    <div class="flex items-start gap-4">
+                        <div class="p-3 bg-amber-500/20 rounded-xl text-amber-400 border border-amber-500/30 shrink-0 mt-0.5">
+                            <i data-lucide="shield-alert" class="w-7 h-7"></i>
+                        </div>
+                        <div>
+                            <div class="flex flex-wrap items-center gap-2">
+                                <span class="px-2.5 py-0.5 text-xs font-bold bg-rose-500/20 text-rose-300 rounded border border-rose-500/40 font-mono">
+                                    MAP-89 BLOKELENDİ
+                                </span>
+                                <span class="text-xs text-amber-400 font-semibold uppercase tracking-wider flex items-center gap-1">
+                                    <i data-lucide="pause-circle" class="w-3.5 h-3.5"></i> Test Süreci Durduruldu
+                                </span>
+                            </div>
+                            <h3 class="text-lg font-bold text-white mt-1">
+                                Figma Tasarımı ve İş Kararları Uyumsuzluğu
+                            </h3>
+                            <p class="text-sm text-slate-300 mt-1 max-w-4xl leading-relaxed">
+                                Geliştirilen ekran ile Figma tasarımları birebir örtüşmemektedir. Ayrıca eksik ve netleşmemiş iş kararları nedeniyle test devam ettirilememiştir. Product Owner (PO) kararları ve Figma revizyonu beklenmektedir.
+                            </p>
+                        </div>
+                    </div>
+                    <button onclick="switchTab('action-plan')" class="px-4 py-2.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs sm:text-sm rounded-xl transition-all shrink-0 flex items-center gap-2 shadow-lg shadow-amber-500/20">
+                        <span>Çözüm Aksiyonları</span>
+                        <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                    </button>
+                </div>
+            </section>
+
+            <!-- Detailed Breakdown Grid -->
+            <section class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                
+                <!-- Task Bug Distribution -->
+                <div class="lg:col-span-2 glass-card rounded-2xl p-6">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-6 border-b border-slate-800 pb-4">
+                        <div>
+                            <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                                <i data-lucide="layers" class="w-5 h-5 text-indigo-400"></i>
+                                Yeni Maddelerde Çıkan Bug Dağılımı
+                            </h3>
+                            <p class="text-xs text-slate-400 mt-0.5">Son haftada eklenen 23 yeni bug'ın task bazlı kırılımı</p>
+                        </div>
+                        <span class="text-xs font-mono bg-slate-800 px-3 py-1 rounded-full text-slate-300 border border-slate-700 self-start sm:self-auto">
+                            24 Temmuz Verisi
+                        </span>
+                    </div>
+
+                    <div class="space-y-6">
+                        
+                        <!-- MAP-80 -->
+                        <div class="space-y-2">
+                            <div class="flex justify-between items-center text-sm">
+                                <div class="flex items-center gap-2.5">
+                                    <span class="font-mono font-bold text-indigo-400 bg-indigo-500/10 px-2.5 py-0.5 rounded border border-indigo-500/20 text-xs">
+                                        MAP-80
+                                    </span>
+                                    <span class="text-slate-200 font-semibold">Favoriler Modülü</span>
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    <span class="text-slate-400 text-xs font-mono">%52 Pay</span>
+                                    <span class="font-extrabold text-amber-400 text-base">12 Bug</span>
+                                </div>
+                            </div>
+                            <div class="w-full bg-slate-800/80 h-3 rounded-full overflow-hidden p-0.5 border border-slate-700/50">
+                                <div class="h-full rounded-full bg-gradient-to-r from-indigo-500 to-amber-500 transition-all duration-1000" style="width: 52%;"></div>
+                            </div>
+                            <p class="text-xs text-slate-400">Ana ekran senkronizasyonu ve offline favori durumlarında yoğunlaşma.</p>
+                        </div>
+
+                        <!-- MAP-99 -->
+                        <div class="space-y-2">
+                            <div class="flex justify-between items-center text-sm">
+                                <div class="flex items-center gap-2.5">
+                                    <span class="font-mono font-bold text-indigo-400 bg-indigo-500/10 px-2.5 py-0.5 rounded border border-indigo-500/20 text-xs">
+                                        MAP-99
+                                    </span>
+                                    <span class="text-slate-200 font-semibold">Filtreleme Özelliği</span>
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    <span class="text-slate-400 text-xs font-mono">%43 Pay</span>
+                                    <span class="font-extrabold text-amber-400 text-base">10 Bug</span>
+                                </div>
+                            </div>
+                            <div class="w-full bg-slate-800/80 h-3 rounded-full overflow-hidden p-0.5 border border-slate-700/50">
+                                <div class="h-full rounded-full bg-gradient-to-r from-indigo-500 to-orange-500 transition-all duration-1000" style="width: 43%;"></div>
+                            </div>
+                            <p class="text-xs text-slate-400">Çoklu filtre kombinasyonları ve resetleme mantığındaki kenar durumlar (edge cases).</p>
+                        </div>
+
+                        <!-- MAP-89 -->
+                        <div class="space-y-2">
+                            <div class="flex justify-between items-center text-sm">
+                                <div class="flex items-center gap-2.5">
+                                    <span class="font-mono font-bold text-rose-400 bg-rose-500/10 px-2.5 py-0.5 rounded border border-rose-500/20 text-xs">
+                                        MAP-89
+                                    </span>
+                                    <span class="text-slate-200 font-semibold">Figma & İş Kararı Uyumsuzluğu</span>
+                                    <span class="text-[10px] px-2 py-0.5 bg-rose-500/20 text-rose-300 border border-rose-500/30 rounded font-bold uppercase">
+                                        Bloke
+                                    </span>
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    <span class="text-slate-400 text-xs font-mono">%5 Pay</span>
+                                    <span class="font-extrabold text-rose-400 text-base">1 Bug</span>
+                                </div>
+                            </div>
+                            <div class="w-full bg-slate-800/80 h-3 rounded-full overflow-hidden p-0.5 border border-slate-700/50">
+                                <div class="h-full rounded-full bg-rose-500 transition-all duration-1000" style="width: 5%;"></div>
+                            </div>
+                            <p class="text-xs text-rose-300/80">Netleşmeyen iş kuralı nedeniyle test durduruldu. Ek bug kaydı açılması engellendi.</p>
+                        </div>
+
+                    </div>
+
+                    <div class="mt-6 p-4 bg-slate-950/80 rounded-xl border border-slate-800 text-xs text-slate-400 space-y-1.5">
+                        <div class="flex items-center gap-1.5 font-semibold text-slate-200">
+                            <i data-lucide="info" class="w-4 h-4 text-indigo-400"></i>
+                            <span>Analiz Notu:</span>
+                        </div>
+                        <p class="leading-relaxed">
+                            Yeni açılan bug'ların <strong>%95'i (22 / 23 bug)</strong> doğrudan Favoriler (MAP-80) ve Filtreleme (MAP-99) modüllerinde yoğunlaşmıştır. Bu modüller karmaşık durum yönetimi (state management) içerdiğinden Dev Pre-QA adımı bu ekranlarda kritik önem taşımaktadır.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Weekly Progress Comparison Card -->
+                <div class="glass-card rounded-2xl p-6 flex flex-col justify-between">
+                    <div>
+                        <div class="border-b border-slate-800 pb-4 mb-6">
+                            <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                                <i data-lucide="git-compare" class="w-5 h-5 text-indigo-400"></i>
+                                Haftalık İlerleme Kıyası
+                            </h3>
+                            <p class="text-xs text-slate-400 mt-0.5">17 Temmuz vs 24 Temmuz Değişimi</p>
+                        </div>
+
+                        <div class="space-y-4">
+                            <!-- 17 Temmuz Block -->
+                            <div class="p-4 bg-slate-950/80 rounded-xl border border-slate-800">
+                                <div class="flex justify-between items-center text-xs font-semibold mb-2">
+                                    <span class="text-slate-400">17 Temmuz Durumu</span>
+                                    <span class="text-emerald-400 font-mono">38 / 40 Done (%95)</span>
+                                </div>
+                                <div class="w-full bg-slate-800 h-2.5 rounded-full overflow-hidden">
+                                    <div class="bg-emerald-500 h-full rounded-full" style="width: 95%;"></div>
+                                </div>
+                                <p class="text-[11px] text-slate-400 mt-2 flex items-center gap-1">
+                                    <i data-lucide="check" class="w-3 h-3 text-emerald-400"></i> Yüksek tamamlama oranı (Sadece 2 açık bug).
+                                </p>
+                            </div>
+
+                            <!-- 24 Temmuz Block -->
+                            <div class="p-4 bg-slate-950/80 rounded-xl border border-slate-800">
+                                <div class="flex justify-between items-center text-xs font-semibold mb-2">
+                                    <span class="text-slate-400">24 Temmuz Durumu</span>
+                                    <span class="text-amber-400 font-mono">42 / 63 Done (%66.7)</span>
+                                </div>
+                                <div class="w-full bg-slate-800 h-2.5 rounded-full overflow-hidden">
+                                    <div class="bg-amber-500 h-full rounded-full" style="width: 66.7%;"></div>
+                                </div>
+                                <p class="text-[11px] text-slate-400 mt-2 flex items-center gap-1">
+                                    <i data-lucide="alert-triangle" class="w-3 h-3 text-amber-400"></i> Yeni feature testleri sebebiyle açık bug 19'a yükseldi.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-6 pt-4 border-t border-slate-800">
+                        <div class="flex items-center justify-between text-xs">
+                            <span class="text-slate-400">Test Hızı (Weekly Output):</span>
+                            <span class="text-indigo-400 font-bold font-mono">+23 Test Edilen İster</span>
+                        </div>
+                        <div class="flex items-center justify-between text-xs mt-2">
+                            <span class="text-slate-400">Bug Değil Bildirimi:</span>
+                            <span class="text-slate-300 font-bold font-mono">2 Adet Kapatıldı</span>
+                        </div>
+                    </div>
+                </div>
+
+            </section>
+        </main>
+
+        <!-- TAB 2: TARGET ANALYSIS -->
+        <main id="tab-target-analysis" class="tab-content space-y-6">
+            <div class="glass-card rounded-2xl p-6 md:p-8">
+                
+                <div class="flex items-start gap-4 pb-6 border-b border-slate-800">
+                    <div class="p-3 bg-indigo-500/10 rounded-xl text-indigo-400 border border-indigo-500/20 shrink-0">
+                        <i data-lucide="target" class="w-7 h-7"></i>
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span class="px-2.5 py-0.5 text-xs font-bold bg-indigo-500/20 text-indigo-300 rounded border border-indigo-500/30">
+                                Yönetici Sorusu Değerlendirmesi
+                            </span>
+                        </div>
+                        <h2 class="text-xl font-bold text-white mt-1">
+                            "Bir Task İçin Sabit Bug Hedefi (Sınırı) Koymak Mantıklı mı?"
+                        </h2>
+                        <p class="text-slate-400 text-sm mt-1">
+                            Yönetimin "Her task için sabit bir bug limiti konulsun" talebinin teknik/mimarî değerlendirmesi ve alternatif ölçüm modelleri.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Comparison Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+                    
+                    <!-- Why Fixed Target Fails -->
+                    <div class="bg-slate-950 p-6 rounded-xl border border-slate-800 space-y-4">
+                        <div class="flex items-center gap-2 text-rose-400 font-bold text-base border-b border-slate-800/80 pb-3">
+                            <i data-lucide="x-circle" class="w-5 h-5 shrink-0"></i>
+                            <span>Neden Sabit Hedef (Örn: Task Başı Max 2 Bug) Mantıklı Değil?</span>
+                        </div>
+                        
+                        <ul class="space-y-3.5 text-sm text-slate-300 leading-relaxed">
+                            <li class="flex items-start gap-2.5">
+                                <i data-lucide="chevron-right" class="w-4 h-4 text-rose-400 shrink-0 mt-1"></i>
+                                <div>
+                                    <strong class="text-white">Karmaşıklık ve Efor Farkı:</strong> MAP-80 (Favoriler - 12 bug) gibi geniş durum yönetimi gerektiren bir task ile 1 saatlik statik metin değişikliği aynı kategoride değerlendirilemez.
+                                </div>
+                            </li>
+                            <li class="flex items-start gap-2.5">
+                                <i data-lucide="chevron-right" class="w-4 h-4 text-rose-400 shrink-0 mt-1"></i>
+                                <div>
+                                    <strong class="text-white">Bug Gizleme & Geçici Çözüm Riski:</strong> Katı kısıtlama konulduğunda, geliştiriciler veya ekipler bug kaydı açmaktan kaçınabilir veya hatalar geçici yyamalarla kapatılabilir.
+                                </div>
+                            </li>
+                            <li class="flex items-start gap-2.5">
+                                <i data-lucide="chevron-right" class="w-4 h-4 text-rose-400 shrink-0 mt-1"></i>
+                                <div>
+                                    <strong class="text-white">Dış Bağımlılıklar & Tasarım Eksikleri:</strong> MAP-89 örneğinde görüldüğü gibi, yazılımcı koda başlamadan önce tasarımın yanlış veya iş kararlarının eksik olması geliştiriciden bağımsız bug üretir.
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- What Should Be Measured Instead -->
+                    <div class="bg-slate-950 p-6 rounded-xl border border-slate-800 space-y-4">
+                        <div class="flex items-center gap-2 text-emerald-400 font-bold text-base border-b border-slate-800/80 pb-3">
+                            <i data-lucide="check-circle-2" class="w-5 h-5 shrink-0"></i>
+                            <span>Bunun Yerine Ne Ölçülmeli ve Hedeflenmeli?</span>
+                        </div>
+
+                        <ul class="space-y-3.5 text-sm text-slate-300 leading-relaxed">
+                            <li class="flex items-start gap-2.5">
+                                <i data-lucide="chevron-right" class="w-4 h-4 text-emerald-400 shrink-0 mt-1"></i>
+                                <div>
+                                    <strong class="text-white">Story Point Başına Hata Yoğunluğu (Defect Density):</strong> Task adedi yerine, task'ın zorluk derecesine (Story Point) göre çıkan bug oranı izlenmelidir.
+                                </div>
+                            </li>
+                            <li class="flex items-start gap-2.5">
+                                <i data-lucide="chevron-right" class="w-4 h-4 text-emerald-400 shrink-0 mt-1"></i>
+                                <div>
+                                    <strong class="text-white">İlk Seferde Geçiş Oranı (First-Time Pass Rate):</strong> Teste gönderilen task'ın hiç bug açılmadan tamamlanma yüzdesi. (Hedef: %80+ Pass Rate)
+                                </div>
+                            </li>
+                            <li class="flex items-start gap-2.5">
+                                <i data-lucide="chevron-right" class="w-4 h-4 text-emerald-400 shrink-0 mt-1"></i>
+                                <div>
+                                    <strong class="text-white">Hata Kök Neden Ayrımı (Kod Hatalı vs Analiz/Tasarım Hatalı):</strong> Açılan bug'ların kaçı kod hatası, kaçı Figma/PO kararsızlığı kaynaklı ayrıştırılmalıdır.
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+
+                </div>
+
+                <!-- Strategic Quality Framework Proposal -->
+                <div class="mt-8 p-6 bg-gradient-to-r from-indigo-950/60 to-slate-950 border border-indigo-500/30 rounded-xl space-y-3">
+                    <div class="flex items-center gap-2 text-indigo-300 font-bold text-base">
+                        <i data-lucide="zap" class="w-5 h-5 text-indigo-400"></i>
+                        <span>Yönetim İçin Önerilen Kalite KPI Çerçevesi</span>
+                    </div>
+                    <p class="text-slate-300 text-sm leading-relaxed">
+                        Ekibe <em>"Task başına en fazla 2 bug çıkabilir"</em> şeklinde suni bir baskı kurmak yerine; <strong>"Dev Pre-QA Checklist'inin doldurulması zorunluluğu"</strong> ve <strong>"Teste giren işlerde ilk seferde geçiş (First-Time Pass) oranının %80'in üzerine çıkarılması"</strong> net ve sürdürülebilir bir KPI olarak belirlenmelidir.
+                    </p>
+                </div>
+
+            </div>
+        </main>
+
+        <!-- TAB 3: ACTION PLAN -->
+        <main id="tab-action-plan" class="tab-content space-y-6">
+            <div class="glass-card rounded-2xl p-6 md:p-8">
+                
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-slate-800">
+                    <div>
+                        <h2 class="text-xl font-bold text-white flex items-center gap-2">
+                            <i data-lucide="sliders" class="w-6 h-6 text-indigo-400"></i>
+                            Süreç İyileştirme & Bug Azaltma Aksiyon Planı
+                        </h2>
+                        <p class="text-slate-400 text-sm mt-1">
+                            Yapılan testlerde alınan notlar doğrultusunda, süreçleri hızlandıracak ve bug sayısını düşürecek 5 altın kural.
+                        </p>
+                    </div>
+
+                    <!-- Progress Bar Component -->
+                    <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 shrink-0 min-w-[220px]">
+                        <div class="flex justify-between items-center text-xs font-semibold mb-1.5">
+                            <span class="text-slate-400">Uygulanan Aksiyonlar</span>
+                            <span id="progress-text" class="text-emerald-400 font-mono">0 / 5 (%0)</span>
+                        </div>
+                        <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+                            <div id="progress-bar" class="bg-emerald-500 h-full rounded-full transition-all duration-300" style="width: 0%;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Items List -->
+                <div class="space-y-4 mt-6">
+                    
+                    <!-- Action Item 1 -->
+                    <div onclick="toggleAction(1)" id="action-item-1" 
+                        class="action-item p-5 rounded-xl border border-slate-800 bg-slate-950/80 hover:border-slate-700 cursor-pointer transition-all">
+                        <div class="flex items-start gap-4">
+                            <div class="checkbox-icon p-2.5 rounded-lg bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 shrink-0 mt-0.5">
+                                <i data-lucide="zap" class="w-5 h-5"></i>
+                            </div>
+                            <div class="flex-1 space-y-1">
+                                <div class="flex flex-wrap items-center gap-2">
+                                    <h3 class="action-title font-bold text-base text-white">
+                                        1. Anlık Fix İletimi (Sprint Beklememe)
+                                    </h3>
+                                    <span class="text-xs px-2 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700">
+                                        Süreç Hızı
+                                    </span>
+                                    <span class="text-xs px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30 font-semibold">
+                                        Önem: Yüksek
+                                    </span>
+                                </div>
+                                <p class="text-sm text-slate-300 leading-relaxed">
+                                    Bir bug için düzeltme (fix) çıktığında, geliştirme sprint sonunu veya toplu paket sürümünü beklememelidir. CI/CD otomasyonu üzerinden doğrudan test ortamına aktarılıp hızlıca re-test edilmelidir.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Action Item 2 -->
+                    <div onclick="toggleAction(2)" id="action-item-2" 
+                        class="action-item p-5 rounded-xl border border-slate-800 bg-slate-950/80 hover:border-slate-700 cursor-pointer transition-all">
+                        <div class="flex items-start gap-4">
+                            <div class="checkbox-icon p-2.5 rounded-lg bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 shrink-0 mt-0.5">
+                                <i data-lucide="user-check" class="w-5 h-5"></i>
+                            </div>
+                            <div class="flex-1 space-y-1">
+                                <div class="flex flex-wrap items-center gap-2">
+                                    <h3 class="action-title font-bold text-base text-white">
+                                        2. Geliştirici Öz-Doğrulaması (Dev Pre-QA Check)
+                                    </h3>
+                                    <span class="text-xs px-2 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700">
+                                        Kalite Kontrol
+                                    </span>
+                                    <span class="text-xs px-2 py-0.5 rounded bg-rose-500/20 text-rose-300 border border-rose-500/30 font-semibold">
+                                        Önem: Kritik
+                                    </span>
+                                </div>
+                                <p class="text-sm text-slate-300 leading-relaxed">
+                                    Geliştirmeyi yapan kişi task'ı QA ortamına göndermeden önce Figma tasarımı ve kabul kriterlerine (AC) bizzat bakıp kendisi doğrulamalıdır. Basit arayüz hataları teste girmeden elenmelidir.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Action Item 3 -->
+                    <div onclick="toggleAction(3)" id="action-item-3" 
+                        class="action-item p-5 rounded-xl border border-slate-800 bg-slate-950/80 hover:border-slate-700 cursor-pointer transition-all">
+                        <div class="flex items-start gap-4">
+                            <div class="checkbox-icon p-2.5 rounded-lg bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 shrink-0 mt-0.5">
+                                <i data-lucide="help-circle" class="w-5 h-5"></i>
+                            </div>
+                            <div class="flex-1 space-y-1">
+                                <div class="flex flex-wrap items-center gap-2">
+                                    <h3 class="action-title font-bold text-base text-white">
+                                        3. Net Olmayan İsterlerde PO İstişaresi & İnisiyatif Alınmaması
+                                    </h3>
+                                    <span class="text-xs px-2 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700">
+                                        Karar Mekanizması
+                                    </span>
+                                    <span class="text-xs px-2 py-0.5 rounded bg-rose-500/20 text-rose-300 border border-rose-500/30 font-semibold">
+                                        Önem: Kritik
+                                    </span>
+                                </div>
+                                <p class="text-sm text-slate-300 leading-relaxed">
+                                    Tasarımsız veya eksik kurala sahip geliştirmelerde yazılımcı bireysel inisiyatif alıp kod yazmamalıdır. Doğrudan Product Owner (PO) ile iletişime geçilerek eksik durumlar netleştirilmelidir.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Action Item 4 -->
+                    <div onclick="toggleAction(4)" id="action-item-4" 
+                        class="action-item p-5 rounded-xl border border-slate-800 bg-slate-950/80 hover:border-slate-700 cursor-pointer transition-all">
+                        <div class="flex items-start gap-4">
+                            <div class="checkbox-icon p-2.5 rounded-lg bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 shrink-0 mt-0.5">
+                                <i data-lucide="figma" class="w-5 h-5"></i>
+                            </div>
+                            <div class="flex-1 space-y-1">
+                                <div class="flex flex-wrap items-center gap-2">
+                                    <h3 class="action-title font-bold text-base text-white">
+                                        4. Figma Tasarım Hijyeni & Alternatiflerin Ayrılması
+                                    </h3>
+                                    <span class="text-xs px-2 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700">
+                                        Tasarım Düzeni
+                                    </span>
+                                    <span class="text-xs px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30 font-semibold">
+                                        Önem: Orta
+                                    </span>
+                                </div>
+                                <p class="text-sm text-slate-300 leading-relaxed">
+                                    Figma üzerindeki eski, onaylanmamış veya kafa karıştıran alternatif tasarımlar ana akıştan temizlenmelidir. Bu tasarımlar ayrı bir "Draft / Archive" alanına taşınarak kafa karışıklığı önlenmelidir.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Action Item 5 -->
+                    <div onclick="toggleAction(5)" id="action-item-5" 
+                        class="action-item p-5 rounded-xl border border-slate-800 bg-slate-950/80 hover:border-slate-700 cursor-pointer transition-all">
+                        <div class="flex items-start gap-4">
+                            <div class="checkbox-icon p-2.5 rounded-lg bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 shrink-0 mt-0.5">
+                                <i data-lucide="message-square-code" class="w-5 h-5"></i>
+                            </div>
+                            <div class="flex-1 space-y-1">
+                                <div class="flex flex-wrap items-center gap-2">
+                                    <h3 class="action-title font-bold text-base text-white">
+                                        5. Karar ve Yanıtların Task Yorumlarına İşlenmesi
+                                    </h3>
+                                    <span class="text-xs px-2 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700">
+                                        Dokümantasyon
+                                    </span>
+                                    <span class="text-xs px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30 font-semibold">
+                                        Önem: Yüksek
+                                    </span>
+                                </div>
+                                <p class="text-sm text-slate-300 leading-relaxed">
+                                    Sözlü toplantılarda veya Anlık mesajlaşmalarda (Slack/Teams) alınan tüm kararlar ve cevaplanan sorular eksiksiz şekilde ilgili Jira/Task yorumlarına yazılı olarak geçirilmelidir.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Footer Integration Note -->
+                <div class="mt-8 p-4 bg-indigo-950/30 border border-indigo-500/20 rounded-xl flex items-center justify-between text-xs text-slate-300">
+                    <div class="flex items-center gap-3">
+                        <i data-lucide="file-text" class="w-5 h-5 text-indigo-400 shrink-0"></i>
+                        <span>Bu 5 kural önümüzdeki Sprint Retrospective toplantısında ekibe sunulacak ve DOD (Definition of Done) maddesi olarak işletilecektir.</span>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="pt-6 border-t border-slate-800/80 flex flex-col sm:flex-row justify-between items-center text-xs text-slate-500 gap-4">
+            <p>© 2026 Mobil Uygulama Kalite Güvence & Yazılım Yönetimi</p>
+            <div class="flex items-center gap-4">
+                <span>Raporlayan: QA & Dev Lead</span>
+                <span>•</span>
+                <span>Konu: Haftalık Bug Trend & Süreç Notları</span>
+            </div>
+        </footer>
+
+    </div>
+
+    <script>
+        // Tab Switching Logic
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active', 'bg-indigo-600', 'text-white', 'shadow-lg', 'shadow-indigo-600/30');
+                btn.classList.add('text-slate-400', 'hover:text-white', 'hover:bg-slate-800/60');
+            });
+
+            const targetTab = document.getElementById('tab-' + tabId);
+            const targetBtn = document.getElementById('tab-btn-' + tabId);
+
+            if (targetTab) targetTab.classList.add('active');
+            if (targetBtn) {
+                targetBtn.classList.add('active', 'bg-indigo-600', 'text-white', 'shadow-lg', 'shadow-indigo-600/30');
+                targetBtn.classList.remove('text-slate-400', 'hover:text-white', 'hover:bg-slate-800/60');
+            }
+        }
+
+        // Action Items State
+        const totalActions = 5;
+        const completedActions = new Set();
+
+        function toggleAction(id) {
+            const item = document.getElementById(`action-item-${id}`);
+            if (!item) return;
+
+            const iconContainer = item.querySelector('.checkbox-icon');
+            const title = item.querySelector('.action-title');
+
+            if (completedActions.has(id)) {
+                completedActions.delete(id);
+                item.classList.remove('bg-emerald-950/20', 'border-emerald-500/40');
+                item.classList.add('bg-slate-950/80', 'border-slate-800');
+                if (title) title.classList.remove('line-through', 'text-slate-400');
+                
+                if (iconContainer) {
+                    iconContainer.className = 'checkbox-icon p-2.5 rounded-lg bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 shrink-0 mt-0.5';
+                }
+            } else {
+                completedActions.add(id);
+                item.classList.add('bg-emerald-950/20', 'border-emerald-500/40');
+                item.classList.remove('bg-slate-950/80', 'border-slate-800');
+                if (title) title.classList.add('line-through', 'text-slate-400');
+                
+                if (iconContainer) {
+                    iconContainer.className = 'checkbox-icon p-2.5 rounded-lg bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 shrink-0 mt-0.5';
+                }
+            }
+
+            updateProgress();
+        }
+
+        function updateProgress() {
+            const count = completedActions.size;
+            const percentage = Math.round((count / totalActions) * 100);
+
+            document.getElementById('completed-count-badge').textContent = count;
+            document.getElementById('progress-text').textContent = `${count} / ${totalActions} (%${percentage})`;
+            document.getElementById('progress-bar').style.width = `${percentage}%`;
+        }
+
+        // Initialize Lucide Icons on load
+        window.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+        });
+    </script>
+</body>
+</html>
